@@ -54,15 +54,15 @@ Related backend repository:
 
 ### Login Page
 
-<img src="./screenshots/01-login-page.png" width="700"/>
+<img src="./screenshots/accesshub-overview.png" width="700"/>
 
 ### Protected Dashboard
 
-<img src="./screenshots/02-dashboard-page.png" width="700"/>
+<img src="./screenshots/accesshub-dashboard.png" width="700"/>
 
 ### Admin Panel
 
-<img src="./screenshots/03-admin-page.png" width="700"/>
+<img src="./screenshots/accesshub-admin-panel.png" width="700"/>
 
 ## Tech Stack
 
