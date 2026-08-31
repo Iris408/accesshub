@@ -1,25 +1,23 @@
-![Docker CI](https://github.com/Iris408/jwt-authentication-dashboard/actions/workflows/docker-ci.yml/badge.svg)
-![Frontend CI](https://github.com/Iris408/jwt-authentication-dashboard/actions/workflows/frontend-ci.yml/badge.svg)
+![Docker CI](https://github.com/Iris408/accesshub/actions/workflows/docker-ci.yml/badge.svg)
+![Frontend CI](https://github.com/Iris408/accesshub/actions/workflows/frontend-ci.yml/badge.svg)
 
-# JWT Authentication Dashboard
+# AccessHub
 
-JWT Authentication Dashboard is a React and TypeScript authentication frontend connected to a deployed FastAPI backend.
-
-It demonstrates a complete JWT authentication flow, including user login, token storage, protected dashboard access, admin-only user listing, role-based UI behaviour, Vercel deployment, Render backend integration, Docker support, and GitHub Actions CI checks.
+AccessHub is a React and TypeScript authentication frontend connected to a deployed FastAPI backend.
 
 ## Live Demo
 
 Frontend:
 
-- [JWT Authentication Dashboard](https://jwt-authentication-dashboard-sepia.vercel.app)
+- [AccessHub](https://jwt-authentication-dashboard-sepia.vercel.app)
 
 Backend API:
 
-- [Mini User API Swagger Docs](https://mini-user-api.onrender.com/docs)
+- [Secure User API Swagger Docs](https://mini-user-api.onrender.com/docs)
 
 Related backend repository:
 
-- [Mini User API](https://github.com/Iris408/mini-user-api)
+- [Secure User API](https://github.com/Iris408/mini-user-api)
 
 ## Current Status
 
@@ -80,8 +78,8 @@ Related backend repository:
 Clone the repository:
 
 ```bash
-git clone https://github.com/Iris408/jwt-authentication-dashboard
-cd jwt-authentication-dashboard
+git clone https://github.com/Iris408/accesshub
+cd accesshub
 ```
 
 Install dependencies:
@@ -118,11 +116,11 @@ More detailed project documentation is available in the `docs/` folder.
 | [Auth Flow](./docs/auth-flow.md) | JWT login, token storage, protected routes, and admin-only access |
 | [Frontend Notes](./docs/frontend-notes.md) | Pages, UI behaviour, routing, loading states, and frontend improvements |
 | [Project Details](./docs/project-details.md) | Architecture, related backend, limitations, future improvements, and learning notes |
-| [CI/CD Notes](./docs/ci-cd.md) | Frontend CI and Docker CI workflow notes |
+| [CI Notes](./docs/ci.md) | Frontend CI and Docker CI workflow notes |
 
 ## Project Summary
 
-JWT Authentication Dashboard is a frontend authentication project built to practise React and TypeScript authentication flows, protected routing, role-based UI behaviour, authenticated API requests, deployed backend integration, Vercel deployment, Docker support, and CI/CD checks.
+AccessHub is a React and TypeScript authentication frontend demonstrating a complete JWT-based authentication and authorisation flow. It integrates with Secure User API to provide protected routing, role-based access, admin-only functionality, authenticated API requests, and production-style deployment using Vercel, Render, Docker, and GitHub Actions CI.
 
 ## Author
 

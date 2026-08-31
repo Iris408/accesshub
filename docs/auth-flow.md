@@ -1,33 +1,37 @@
 # Auth Flow
 
-This document explains the JWT authentication flow used by JWT Authentication Dashboard.
+This document explains the JWT authentication and role-based access flow used by AccessHub.
 
 ## Authentication Overview
 
-The frontend connects to the Mini User API backend and uses JWT access tokens for authenticated requests.
+AccessHub connects to the Secure User API backend and uses JWT access tokens for authenticated requests.
+
+The frontend is responsible for handling the user-facing authentication state, while credential verification, token generation, user data, and role-based permissions are handled by Secure User API.
 
 ## Basic Flow
 
 ```text
 1. User enters login credentials.
-2. Frontend sends a login request to the Mini User API backend.
-3. Backend verifies the credentials.
-4. Backend returns a JWT access token.
-5. Frontend stores the token in local storage.
-6. Protected pages send the token in the Authorization header.
-7. Dashboard loads the authenticated user profile.
-8. Admin page loads user data only when the authenticated user has an admin role.
+2. AccessHub sends a login request to Secure User API.
+3. Secure User API verifies the credentials.
+4. The backend returns a JWT access token.
+5. AccessHub stores the token in local storage.
+6. Protected requests send the token in the Authorization header.
+7. The dashboard loads the authenticated user's profile.
+8. The admin page requests user data only for users with admin-level access.
 ```
 
 ## Token Storage
 
 The JWT access token is stored in local storage.
 
-This allows the frontend to send authenticated requests after login.
+This allows AccessHub to include the token with authenticated API requests after login.
+
+Local storage is used for this portfolio implementation and is documented as a limitation rather than a production authentication recommendation.
 
 ## Authorization Header
 
-Protected API requests include the token in this format:
+Protected API requests include the token using the Bearer authentication scheme:
 
 ```text
 Authorization: Bearer your_access_token
@@ -35,31 +39,46 @@ Authorization: Bearer your_access_token
 
 ## Protected Dashboard
 
-The dashboard route requires a valid token.
+The `/dashboard` route represents authenticated application content.
 
-If the token is missing or invalid, the user should not be able to access protected dashboard content.
+AccessHub uses the authentication state to prevent unauthenticated users from accessing protected dashboard functionality.
 
-## Admin-only Page
+Authenticated profile information is retrieved from Secure User API.
 
-The admin page checks whether the authenticated user has admin-level access before showing user list data.
+## Admin-Only Page
 
-This demonstrates basic role-based UI behaviour.
+The `/admin` route provides role-restricted functionality.
+
+AccessHub uses authenticated user information and the backend's role-based access controls before displaying admin-only user data.
+
+This demonstrates the separation between authentication and authorization:
+
+- **Authentication** determines whether the user is signed in.
+- **Authorization** determines which protected functionality the authenticated user can access.
 
 ## Main Backend Routes Used
 
-The connected Mini User API backend includes routes such as:
+AccessHub integrates with Secure User API routes including:
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| POST | `/auth/login` | Login and receive JWT token |
-| GET | `/users/me` | Get current authenticated user |
-| GET | `/users` | Admin-only user list |
+| POST | `/auth/login` | Authenticate and receive a JWT access token |
+| GET | `/users/me` | Retrieve the current authenticated user |
+| GET | `/users` | Retrieve the admin-only user list |
 
-## Future Auth Improvements
+## Current Limitations
 
-- Add refresh token support
-- Add logout token cleanup improvements
-- Add dedicated unauthorized page
-- Add user profile editing
-- Improve production auth handling
-- Add frontend auth tests
+The current authentication implementation is intentionally limited to the scope of the AccessHub portfolio project.
+
+Known limitations include:
+
+- Refresh tokens are not implemented.
+- JWT access tokens are stored in local storage.
+- Authentication would require additional security hardening for production use.
+- Frontend authentication test coverage can be expanded.
+
+## Maintenance
+
+The authentication flow is feature-complete for the current AccessHub scope.
+
+Future work should focus on authentication security review, dependency updates, test coverage, compatibility fixes, and maintaining integration with Secure User API rather than adding additional product functionality.

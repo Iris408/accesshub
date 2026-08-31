@@ -54,14 +54,19 @@ function LoginPage() {
   return (
     <div className="auth-page">
       <section className="auth-hero">
-        <div className="auth-badge">JWT Auth Portfolio Project</div>
+        <div className="auth-brand">
+          <div className="auth-badge">AH</div>
 
-        <h1>JWT Authentication Dashboard</h1>
+          <div>
+            <p className="auth-eyebrow">Authentication & Access Management</p>
+            <h1>AccessHub</h1>
+          </div>
+        </div>
 
         <p className="auth-subtitle">
-          A React and TypeScript authentication dashboard connected to a
-          deployed FastAPI backend with protected routes and admin-only access.
-        </p>
+          Secure authentication, protected routes, and role-based access
+          powered by React, TypeScript, and FastAPI.
+        </p> 
 
         <div className="auth-feature-grid">
           <div className="auth-feature-card">
@@ -87,7 +92,7 @@ function LoginPage() {
       <section className="auth-card-section">
         <div className="auth-card">
           <div className="auth-card-header">
-            <div className="auth-logo">JWT</div>
+            <div className="auth-logo">AH</div>
 
             <div>
               <h2>Sign in</h2>
@@ -138,7 +143,7 @@ function LoginPage() {
           </div>
 
           <p className="auth-backend-note">
-            Connected to Mini User API on Render.
+            Connected to Secure User API on Render.
           </p>
         </div>
       </section>

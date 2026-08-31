@@ -40,18 +40,55 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: left;
 }
 
 .auth-badge {
-  width: fit-content;
-  background: rgba(59, 130, 246, 0.16);
-  color: #bfdbfe;
-  border: 1px solid rgba(147, 197, 253, 0.3);
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  background: rgba(37, 99, 235, 0.22);
+  color: #dbeafe;
+
+  border: 1px solid rgba(147, 197, 253, 0.45);
+  border-radius: 14px;
+
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+
+  box-shadow:
+    0 8px 24px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
   margin-bottom: 24px;
+}
+
+.auth-brand .auth-badge {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.auth-eyebrow {
+  color: #93c5fd;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+.auth-brand h1 {
+  margin: 0;
 }
 
 .auth-hero h1 {
@@ -64,24 +101,26 @@ body {
 
 .auth-subtitle {
   color: #cbd5e1;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   line-height: 1.7;
-  max-width: 620px;
+  max-width: 580px;
   margin-bottom: 36px;
+  text-align: left;
 }
 
-.auth-feature-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  max-width: 800px;
+.auth-subtitle {
+  color: #cbd5e1;
+  font-size: 1.08rem;
+  line-height: 1.7;
+  max-width: 580px;
+  margin-bottom: 36px;
 }
 
 .auth-feature-card {
   background: rgba(15, 23, 42, 0.58);
   border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 20px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 16px;
   backdrop-filter: blur(14px);
 }
 
@@ -92,14 +131,14 @@ body {
 }
 
 .auth-feature-card h3 {
-  margin: 12px 0 8px;
+  margin: 8px 0 6px;
   color: #ffffff;
 }
 
 .auth-feature-card p {
   color: #cbd5e1;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -130,14 +169,20 @@ body {
 }
 
 .auth-logo {
-  height: 48px;
-  width: 58px;
-  border-radius: 18px;
-  background: #2563eb;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #ffffff;
   display: grid;
   place-items: center;
-  font-weight: 800;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .auth-card h2 {
@@ -285,19 +330,72 @@ button:hover {
 /* Navbar */
 .navbar {
   display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
-  padding: 16px 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  margin-bottom: 40px;
+  padding: 14px 0;
+
+  border-bottom: 1px solid rgba(203, 213, 225, 0.16);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.navbar-logo {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+  background: rgba(37, 99, 235, 0.25);
+  border: 1px solid rgba(147, 197, 253, 0.35);
+
+  color: #dbeafe;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .navbar a {
   text-decoration: none;
-  color: #f3f4f6;
-  font-weight: bold;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .navbar a:hover {
   color: #ffffff;
+}
+
+.navbar a.active {
+  color: #ffffff;
+  position: relative;
+}
+
+.navbar a.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  border-radius: 999px;
+  background: #60a5fa;
 }
 
 /* Text */
@@ -318,7 +416,10 @@ p {
   }
 
   .auth-feature-grid {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    max-width: 800px;
   }
 
   .auth-card-section {
@@ -340,23 +441,24 @@ p {
 
 .dashboard-eyebrow {
   color: #93c5fd;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   margin-bottom: 10px;
 }
 
 .dashboard-header h1 {
-  font-size: 3rem;
-  letter-spacing: -0.05em;
-  margin-bottom: 10px;
+  font-size: 3.2rem;
+  line-height: 1;
+  letter-spacing: -0.055em;
+  margin-bottom: 12px;
 }
 
 .dashboard-subtitle {
   color: #cbd5e1;
   max-width: 560px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .dashboard-status-pill {
@@ -400,13 +502,22 @@ p {
 .profile-avatar {
   width: 64px;
   height: 64px;
-  border-radius: 22px;
-  background: #2563eb;
+  border-radius: 18px;
+
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #ffffff;
+
   display: grid;
   place-items: center;
-  font-size: 1.6rem;
+
+  font-size: 1.35rem;
   font-weight: 900;
+
+  border: 1px solid rgba(147, 197, 253, 0.35);
+
+  box-shadow:
+    0 12px 28px rgba(37, 99, 235, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .card-label {
@@ -549,9 +660,18 @@ p {
 }
 
 .admin-header h1 {
-  font-size: 3rem;
-  letter-spacing: -0.05em;
-  margin-bottom: 10px;
+  font-size: 3.2rem;
+  line-height: 1;
+  letter-spacing: -0.055em;
+  margin-bottom: 12px;
+}
+
+.admin-welcome {
+  color: #cbd5e1;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .admin-stats-grid {
@@ -559,6 +679,33 @@ p {
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
   margin-bottom: 22px;
+}
+
+.admin-stats-grid .dashboard-card {
+  padding: 20px;
+}
+
+.admin-stats-grid .dashboard-card h2 {
+  font-size: 2rem;
+  line-height: 1;
+  margin: 6px 0 0;
+  color: #ffffff;
+}
+
+.admin-stats-grid .card-label {
+  margin-bottom: 0;
+}
+
+.admin-status-pill {
+  background: rgba(59, 130, 246, 0.16);
+  color: #dbeafe;
+  border: 1px solid rgba(147, 197, 253, 0.35);
+
+  border-radius: 999px;
+  padding: 10px 14px;
+
+  font-weight: 800;
+  font-size: 0.85rem;
 }
 
 .admin-toolbar {
@@ -629,12 +776,17 @@ p {
     flex-direction: column;
   }
 
-  .admin-stats-grid,
   .admin-user-grid {
     grid-template-columns: 1fr;
   }
 
   .admin-header h1 {
     font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
   }
 }

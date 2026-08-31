@@ -1,34 +1,35 @@
 # Frontend Notes
 
-This document contains frontend-specific notes for JWT Authentication Dashboard.
+This document contains frontend-specific implementation notes for AccessHub.
 
 ## Pages
 
 | Page | Route | Description |
 | --- | --- | --- |
-| Login | `/` | User login page |
-| Dashboard | `/dashboard` | Protected authenticated user dashboard |
+| Login | `/` | User authentication and demo login interface |
+| Dashboard | `/dashboard` | Protected dashboard for authenticated users |
 | Admin | `/admin` | Admin-only user list and account overview |
 
 ## Main Frontend Responsibilities
 
-The frontend handles:
+The AccessHub frontend handles:
 
 - Login form state
-- API login request
-- JWT token storage
-- Authenticated profile request
-- Protected dashboard rendering
-- Admin-only user list request
+- Authentication requests to Secure User API
+- JWT access token storage
+- Authenticated profile requests
+- Protected route rendering
+- Admin-only user requests
 - Role-based UI behaviour
 - Loading states
-- Error messages
-- Responsive page styling
+- Error handling
+- Logout behaviour
+- Responsive interface styling
 
 ## Project Structure
 
 ```text
-jwt-authentication-dashboard/
+accesshub/
   src/
     components/
       NavBar.tsx
@@ -40,32 +41,75 @@ jwt-authentication-dashboard/
     main.tsx
     styles.css
   screenshots/
+  docs/
   .github/
   package.json
   vite.config.ts
   README.md
 ```
 
-## Recent Improvements
+## Frontend Implementation
 
-- Refreshed login page UI
-- Added modern protected dashboard layout
-- Added admin panel statistics
-- Added user account cards
-- Improved API URL handling
-- Added loading states
-- Added error handling
-- Fixed admin users API integration
-- Improved Mini User API role checking
+### Authentication
 
-## UI Notes
+The login page accepts user credentials and sends them to Secure User API.
 
-The project is designed as a focused authentication dashboard rather than a large full-stack app.
+After successful authentication, the returned JWT access token is stored by the frontend and used for subsequent authenticated API requests.
 
-The main frontend goal is to show:
+### Protected Routes
 
-- Login flow
+Authenticated areas of AccessHub are protected so that users without an access token cannot access the dashboard or admin interface.
+
+### Role-Based Interface
+
+AccessHub uses authenticated user information to control access to role-specific functionality.
+
+Standard authenticated users can access the protected dashboard, while administrator functionality is restricted to users with the appropriate backend role.
+
+### API Integration
+
+The frontend communicates with the separately deployed Secure User API backend.
+
+API integration includes:
+
+- Authentication requests
+- Authenticated profile requests
+- Admin-only user listing
+- Role validation
+- Loading and error-state handling
+
+## UI
+
+AccessHub is intentionally designed as a focused authentication and access-management interface rather than a larger general-purpose application.
+
+The interface demonstrates:
+
+- Authentication flow
 - Protected route behaviour
-- Role-based access behaviour
+- Role-based access
+- Admin-only functionality
 - Backend API integration
-- Clean dashboard UI
+- Loading and error feedback
+- Responsive dashboard presentation
+
+## Completed Improvements
+
+The current frontend includes:
+
+- Refreshed login interface
+- Protected dashboard layout
+- Admin panel statistics
+- User account cards
+- Environment-based API URL handling
+- Loading states
+- Error handling
+- Admin users API integration
+- Secure User API role checking
+- Responsive styling
+- AccessHub product branding
+
+## Maintenance
+
+The frontend is feature-complete for the current AccessHub portfolio scope.
+
+Ongoing work should focus on maintenance rather than feature expansion, including dependency updates, compatibility fixes, test coverage, security review, and documentation accuracy.

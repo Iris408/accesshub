@@ -1,23 +1,33 @@
 function Navbar() {
+  const path = window.location.pathname;
 
   return (
-
     <div className="navbar">
+      <div className="navbar-brand">
+        <span className="navbar-logo">AH</span>
+        <span>AccessHub</span>
+      </div>
 
-      <a href="/">
-        Login
-      </a>
+      <div className="navbar-links">
+        <a className={path === "/" ? "active" : ""} href="/">
+          Login
+        </a>
 
-      <a href="/dashboard">
-        Dashboard
-      </a>
+        <a
+          className={path === "/dashboard" ? "active" : ""}
+          href="/dashboard"
+        >
+          Dashboard
+        </a>
 
-      <a href="/admin">
-        Admin
-      </a>
-
+        <a
+          className={path === "/admin" ? "active" : ""}
+          href="/admin"
+        >
+          Admin
+        </a>
+      </div>
     </div>
-
   );
 }
 
