@@ -6,77 +6,79 @@ This document contains frontend-specific implementation notes for AccessHub.
 
 | Page | Route | Description |
 | --- | --- | --- |
-| Login | `/` | User authentication and demo login interface |
-| Dashboard | `/dashboard` | Protected dashboard for authenticated users |
-| Admin | `/admin` | Admin-only user list and account overview |
+| Sign in | `/` | Public sign-in page with language menu, light/dark switch and an optional isolated demo |
+| Dashboard | `/dashboard` | Access overview: summary cards, users table and activity panel |
+| Users | `/admin` | User directory and admin user management |
+| Help & support | `/help` | Answers to common sign-in and access questions |
+| Access Request, Roles, Activity, Audit Log, Settings | `/access-requests`, `/roles`, `/activity`, `/audit-log`, `/settings` | Placeholders until the API supports them |
+
+All pages except sign-in require a token and live inside the authenticated
+shell (sidebar, top bar). Unknown routes show a "Page not found" page.
 
 ## Main Frontend Responsibilities
 
-The AccessHub frontend handles:
-
-- Login form state
-- Authentication requests to Secure User API
-- JWT access token storage
-- Authenticated profile requests
-- Protected route rendering
-- Admin-only user requests
-- Role-based UI behaviour
-- Loading states
-- Error handling
-- Logout behaviour
-- Responsive interface styling
+- Sign-in form, validation and error messages
+- JWT access token storage (`localStorage`, key `token`)
+- Profile loading, permission checks and session handling (401 ends the session)
+- Users table: search, role and status filters, sorting and pagination
+- Admin user management: create, edit role, deactivate, reactivate, delete
+- Temporary-password change at first sign-in
+- Light/dark theme and six interface languages
+- Loading, empty, error and access-denied states
 
 ## Project Structure
 
 ```text
 accesshub/
   src/
+    api/client.ts          Typed API client (all backend requests)
+    auth/                  Auth context, roles, permissions, token storage
     components/
-      NavBar.tsx
-    pages/
-      LoginPage.tsx
-      DashboardPage.tsx
-      AdminPage.tsx
-    App.tsx
-    main.tsx
-    styles.css
-  screenshots/
+      auth/                Change-password form
+      dashboard/           Activity panel
+      layout/              App shell, sidebar, top bar, language menu
+      public/              Sign-in page illustration, theme switch, links
+      ui/                  Shared components (dialog, menu, table, icons…)
+      users/               Users table, panel and management dialogs
+    hooks/                 useUsers, useTheme, useMediaQuery
+    i18n/                  Translation runtime and one dictionary per language
+    pages/                 Route components
+    test/                  Test setup and API mocks
+    dashboard.css          Theme tokens and app shell styles
+    public.css             Sign-in page layout
   docs/
-  .github/
-  package.json
-  vite.config.ts
-  README.md
+  screenshots/
 ```
 
 ## Frontend Implementation
 
-### Authentication
+### Sign-in
 
-The login page accepts user credentials and sends them to Secure User API.
+The sign-in page sends `POST /login` with `{ username, password }` and stores the
+returned `access_token`. It checks that both fields are filled in before
+calling the API, shows a "Signing in…" state, and translates the API's known
+errors. When an isolated demo API is configured (`VITE_DEMO_API_URL`),
+**Use demo account** opens a credential-free session on that API only; see
+[Setup Guide](./setup.md#public-demo).
 
-After successful authentication, the returned JWT access token is stored by the frontend and used for subsequent authenticated API requests.
+### Protected Routes and Roles
 
-### Protected Routes
+Authenticated pages load `GET /profile`, which returns the user's role and
+permissions. The interface uses those permissions to decide what to show; the
+API enforces them. See [Auth Flow](./auth-flow.md) for roles and session rules.
 
-Authenticated areas of AccessHub are protected so that users without an access token cannot access the dashboard or admin interface.
+### Themes and Languages
 
-### Role-Based Interface
-
-AccessHub uses authenticated user information to control access to role-specific functionality.
-
-Standard authenticated users can access the protected dashboard, while administrator functionality is restricted to users with the appropriate backend role.
+The theme follows the system preference until the user picks one; the choice
+and the selected language (English, 日本語, 한국어, Français, Español, 简体中文)
+are remembered in `localStorage`. Every locale must define the same keys as the
+English dictionary — the build and tests fail otherwise.
 
 ### API Integration
 
-The frontend communicates with the separately deployed Secure User API backend.
-
-API integration includes:
-
-- Authentication requests
-- Authenticated profile requests
-- Admin-only user listing
-- Role validation
-- Loading and error-state handling
+All requests go through `src/api/client.ts`, which adds the bearer token and
+turns error responses into typed errors (`unauthorized`, `forbidden`,
+`conflict`, `invalid`, `notFound`, `network`, `server`).
 
 ## UI
 
@@ -96,10 +98,9 @@ The interface demonstrates:
 
 The current frontend includes:
 
-- Refreshed login interface
-- Protected dashboard layout
-- Admin panel statistics
-- User account cards
+- Illustrated sign-in page with language menu and light/dark switch
+- Dashboard with summary cards, users table and activity panel
+- Four-role permissions and admin user management
 - Environment-based API URL handling
 - Loading states
 - Error handling

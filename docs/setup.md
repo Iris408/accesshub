@@ -63,16 +63,29 @@ npm run build
 
 This verifies that the React, TypeScript, and Vite frontend builds successfully.
 
-## Demo Account
+## Public Demo
 
-Use the demo account shown on the AccessHub login page:
+AccessHub never shows or ships demo credentials. The sign-in page offers
+**Use demo account** only when a separate, isolated demo API is configured:
 
-```text
-Username: testuser
-Password: password123
+```env
+VITE_API_URL=https://your-production-api.example.com
+VITE_DEMO_API_URL=https://your-demo-api.example.com
 ```
 
-The connected backend must contain an administrator account for the admin panel to retrieve protected user data successfully.
+- The demo API must be its own deployment with its own database, running
+  with `APP_ENV=demo` and seeded with `python -m scripts.seed_demo_users`
+  (124 synthetic users plus the `adminDemoUser` demo admin). It also needs its own
+  `SECRET_KEY`, different from production.
+- **Use demo account** calls `POST /demo/session` on the demo API — no
+  username or password is involved — and the session's requests then go only
+  to that API. Real sign-ins always use `VITE_API_URL`.
+- The demo API refuses demo sessions whenever its database contains any
+  non-demo account, and the button is hidden if `VITE_DEMO_API_URL` is unset
+  or equal to `VITE_API_URL`.
+
+Without `VITE_DEMO_API_URL` the button is not shown; sign in with an account
+created by an administrator.
 
 ## Backend Dependency
 
@@ -81,7 +94,7 @@ AccessHub integrates with Secure User API.
 Backend repository:
 
 ```text
-https://github.com/Iris408/mini-user-api
+https://github.com/Iris408/secure-user-api
 ```
 
 Live backend Swagger documentation:

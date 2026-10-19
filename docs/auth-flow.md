@@ -56,15 +56,67 @@ This demonstrates the separation between authentication and authorization:
 - **Authentication** determines whether the user is signed in.
 - **Authorization** determines which protected functionality the authenticated user can access.
 
-## Main Backend Routes Used
+## Roles and Permissions
 
-AccessHub integrates with Secure User API routes including:
+The API defines four roles and returns the signed-in user's permissions on
+`GET /profile`. The interface reads those permissions (falling back to the same
+role matrix in `src/auth/permissions.ts` for older API versions) to decide what
+to show; the API enforces every rule itself.
+
+| Role | Can |
+| --- | --- |
+| Admin | Manage users and roles (`users:read`, `users:manage`) and everything below |
+| Manager | Handle access requests; view team activity |
+| Member | Use the service; submit access requests |
+| Viewer / Auditor | Read activity and audit records without changing data |
+
+Existing accounts keep their access: `admin` / `Admin` become Admin and the
+original standard `user` accounts become Members.
+
+## Session Rules
+
+| API response | What AccessHub does |
+| --- | --- |
+| 401 on any request | Clears the token and returns to sign-in |
+| 403 on `/profile` or `/users` | Shows an access-denied state; the session is kept |
+| 403 on a change (create, edit, …) | Shows "You don't have permission" in the dialog |
+| 409 on a change | Shows the API's reason (e.g. last active admin) in the dialog |
+| Network error or 5xx | Keeps the session and offers Try again |
+
+## Temporary Passwords
+
+Admins create accounts from the Users screen. The API generates a one-time
+temporary password, which AccessHub shows once in a dialog with a Copy button;
+it is held only in component state and never logged or stored. When that user
+signs in, every page is replaced by a "Choose a new password" form until they
+set their own password (`POST /profile/password`).
+
+## Account Lifecycle
+
+- **Deactivate** is the normal way to remove access and can be undone.
+- **Delete permanently** is only offered for deactivated users and requires
+  typing the username to confirm.
+- Admins can't deactivate, delete or change the role of their own account, and
+  the last active admin can't be deactivated. The interface explains disabled
+  actions; the API enforces the same rules.
+- Demo seed accounts (`is_seed`) are labelled **Demo** in the table.
+
+## Main Backend Routes Used
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
-| POST | `/auth/login` | Authenticate and receive a JWT access token |
-| GET | `/users/me` | Retrieve the current authenticated user |
-| GET | `/users` | Retrieve the admin-only user list |
+| POST | `/login` | Authenticate and receive a JWT access token |
+| GET | `/profile` | Current user, role and permissions |
+| POST | `/profile/password` | Replace a temporary password |
+| GET | `/users` | User directory (Admin) |
+| POST | `/users` | Create a user; returns a one-time temporary password |
+| PUT | `/users/{id}` | Change username and role |
+| POST | `/users/{id}/deactivate` | Deactivate |
+| POST | `/users/{id}/reactivate` | Reactivate |
+| DELETE | `/users/{id}` | Permanently delete a deactivated user |
+
+The full contract is documented in the backend's
+[API Reference](https://github.com/Iris408/secure-user-api/blob/main/docs/api-reference.md).
 
 ## Current Limitations
 

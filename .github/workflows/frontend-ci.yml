@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       # Step 3: install dependencies
       - name: Install dependencies
@@ -29,6 +29,10 @@ jobs:
       - name: Run lint
         run: npm run lint      
 
-      # Step 5: run build
+      # Step 5: run tests
+      - name: Run tests
+        run: npm test
+
+      # Step 6: run build
       - name: Run build
         run: npm run build    

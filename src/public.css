@@ -1,0 +1,490 @@
+/*
+ * Public sign-in page. It renders inside an `.ah` root so it shares the app's
+ * theme tokens, focus rings, inputs and language menu (see dashboard.css);
+ * this file only adds the page layout and illustration.
+ *
+ * Layout: intro + illustration on the left, sign-in card on the right.
+ * At 1100px and below (tablets, including 1024px, and phones): intro, then
+ * the form, then the illustration.
+ */
+
+.ah.ah-public {
+  --ah-public-bg: var(--ah-bg);
+  --ah-public-gutter: clamp(16px, 4vw, 64px);
+  --ah-heading: #f4f7fc;
+  --ah-link: #8ab8ff;
+  --ah-signin-input-bg: var(--ah-surface-raised);
+  --ah-card-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  --ah-illus-blob: rgba(59, 130, 246, 0.1);
+  --ah-illus-line: #35507d;
+  --ah-illus-dot: #60a5fa;
+  --ah-illus-avatar-strong: #2563eb;
+  --ah-illus-avatar-mid: #60a5fa;
+  --ah-illus-avatar-soft: #334866;
+  --ah-illus-glyph-soft: #a0aec3;
+  /* Theme switch: light track + dark knob/moon in dark mode. */
+  --ah-switch-track: #e8eef7;
+  --ah-switch-track-icon: #475569;
+  --ah-switch-thumb: #0b1220;
+  --ah-switch-thumb-icon: #f4f7fc;
+
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  min-height: 100vh;
+  background: var(--ah-public-bg);
+}
+
+.ah.ah-public[data-theme="light"] {
+  --ah-public-bg: #f8f8f6;
+  --ah-heading: #0b1b3f;
+  --ah-link: #1a5fd0;
+  --ah-signin-input-bg: #f7f9fc;
+  --ah-card-shadow: 0 24px 60px rgba(15, 23, 42, 0.07);
+  --ah-illus-blob: rgba(37, 99, 235, 0.07);
+  --ah-illus-line: #9db8e3;
+  --ah-illus-dot: #2f74e0;
+  --ah-illus-avatar-strong: #1d4ed8;
+  --ah-illus-avatar-mid: #93c5fd;
+  --ah-illus-avatar-soft: #dbe3ee;
+  --ah-illus-glyph-soft: #64748b;
+  /* Dark track + white knob/sun in light mode. */
+  --ah-switch-track: #1f2a3d;
+  --ah-switch-track-icon: #cbd5e1;
+  --ah-switch-thumb: #ffffff;
+  --ah-switch-thumb-icon: #0b1b3f;
+}
+
+body:has(.ah-public[data-theme="light"]) {
+  background: #f8f8f6;
+}
+
+.ah-public__header,
+.ah-public__main,
+.ah-public__footer {
+  width: min(100% - 2 * var(--ah-public-gutter), 1360px);
+  margin-inline: auto;
+}
+
+/* ---------- Header ---------- */
+
+.ah-public__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: clamp(12px, 2.6vh, 28px);
+}
+
+.ah-public__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ah-heading);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ah-public__mark {
+  width: 38px;
+  height: 38px;
+  fill: var(--ah-primary);
+}
+
+.ah-public__mark-accent {
+  fill: #0b4fc4;
+}
+
+.ah-public__controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ah-public__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--ah-border-strong);
+}
+
+.ah .ah-switch {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--ah-control-border);
+  border-radius: 999px;
+  background: var(--ah-switch-track);
+  cursor: pointer;
+}
+
+.ah .ah-switch:hover {
+  background: var(--ah-switch-track);
+}
+
+.ah-switch__icon {
+  position: absolute;
+  top: 50%;
+  color: var(--ah-switch-track-icon);
+  transform: translateY(-50%);
+}
+
+.ah-switch__icon--sun {
+  left: 9px;
+}
+
+.ah-switch__icon--moon {
+  right: 9px;
+}
+
+.ah-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--ah-switch-thumb);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: var(--ah-switch-thumb-icon);
+  transition: transform 0.2s ease;
+}
+
+.ah-switch[aria-checked="true"] .ah-switch__thumb {
+  transform: translateX(30px);
+}
+
+/* ---------- Main ---------- */
+
+.ah-public__main {
+  display: grid;
+  flex: 1;
+  grid-template-areas:
+    "intro form"
+    "art form";
+  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 500px);
+  align-items: center;
+  gap: clamp(16px, 3vh, 32px) clamp(32px, 6vw, 96px);
+  padding-block: clamp(8px, 2vh, 24px) clamp(16px, 3.5vh, 40px);
+}
+
+.ah-public__intro {
+  grid-area: intro;
+  align-self: end;
+}
+
+.ah .ah-public__heading {
+  max-width: 14ch;
+  margin: 0;
+  color: var(--ah-heading);
+  /* Height-aware so the whole page fits a typical desktop viewport. */
+  font-size: clamp(34px, min(4.4vw, 7vh), 60px);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* The ch-based cap suits Latin text; CJK headings break between phrases. */
+.ah-public:is([lang="ja"], [lang="ko"], [lang="zh-CN"]) .ah-public__heading {
+  max-width: 12em;
+  font-size: clamp(30px, min(4.2vw, 6.6vh), 56px);
+  letter-spacing: -0.01em;
+}
+
+/* The Japanese string marks phrase boundaries with U+200B; keep-all lets
+   lines break only there (in every browser), and anywhere as a last resort. */
+.ah-public[lang="ja"] .ah-public__heading {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.ah-public[lang="ko"] .ah-public__heading {
+  word-break: keep-all;
+}
+
+.ah .ah-public__subheading {
+  margin: clamp(8px, 1.6vh, 18px) 0 0;
+  color: var(--ah-text-muted);
+  font-size: clamp(17px, 1.6vw, 22px);
+}
+
+.ah-public__art {
+  grid-area: art;
+  align-self: start;
+  max-width: min(600px, 62vh);
+}
+
+/* ---------- Illustration ---------- */
+
+.ah-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ah-illustration__blob {
+  fill: var(--ah-illus-blob);
+}
+
+.ah-illustration__blob--soft {
+  opacity: 0.7;
+}
+
+.ah-illustration__lines path {
+  fill: none;
+  stroke: var(--ah-illus-line);
+  stroke-width: 1.5;
+}
+
+.ah-illustration__card {
+  fill: var(--ah-surface);
+  stroke: var(--ah-border);
+  filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.06));
+}
+
+.ah-illustration__card--accent {
+  fill: var(--ah-tone-blue-bg);
+  stroke: var(--ah-badge-admin-border);
+}
+
+.ah-illustration__avatar--strong { fill: var(--ah-illus-avatar-strong); }
+.ah-illustration__avatar--mid { fill: var(--ah-illus-avatar-mid); }
+.ah-illustration__avatar--soft { fill: var(--ah-illus-avatar-soft); }
+
+.ah-illustration__avatar-glyph {
+  fill: #fff;
+}
+
+.ah-illustration__avatar-glyph--soft {
+  fill: var(--ah-illus-glyph-soft);
+}
+
+.ah-illustration__bar {
+  fill: var(--ah-skeleton-base);
+}
+
+.ah-illustration__bar--soft {
+  opacity: 0.7;
+}
+
+.ah-illustration__dot {
+  fill: var(--ah-illus-dot);
+}
+
+.ah-illustration__dot--muted {
+  fill: var(--ah-illus-line);
+}
+
+.ah-illustration__role-icon,
+.ah-illustration__resource {
+  fill: var(--ah-illus-dot);
+}
+
+.ah-illustration__check {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ah-illustration__hole {
+  fill: var(--ah-surface);
+}
+
+.ah-illustration__label {
+  fill: var(--ah-heading);
+  font-family: var(--ah-font);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---------- Sign-in card ---------- */
+
+.ah-signin {
+  grid-area: form;
+  padding: clamp(24px, min(3.5vw, 5vh), 44px);
+  border: 1px solid var(--ah-border);
+  border-radius: 20px;
+  background: var(--ah-surface);
+  box-shadow: var(--ah-card-shadow);
+}
+
+.ah .ah-signin__title {
+  margin: 0 0 clamp(16px, 2.8vh, 28px);
+  color: var(--ah-heading);
+  font-size: clamp(28px, min(3vw, 4.6vh), 42px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.ah-signin .ah-form-error {
+  margin-bottom: 20px;
+}
+
+.ah-signin__form {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.3vh, 22px);
+}
+
+.ah-signin__label {
+  color: var(--ah-text);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.ah .ah-signin__input {
+  height: clamp(46px, 6vh, 54px);
+  padding-left: 48px;
+  background: var(--ah-signin-input-bg);
+  font-size: 16px;
+}
+
+.ah-signin .ah-input-wrap__icon {
+  left: 16px;
+}
+
+.ah .ah-signin__submit,
+.ah .ah-signin__demo {
+  width: 100%;
+  height: clamp(46px, 6vh, 54px);
+  font-size: 17px;
+}
+
+.ah .ah-signin__submit {
+  margin-top: 6px;
+}
+
+.ah .ah-signin__demo {
+  border: 1.5px solid var(--ah-link);
+  background: transparent;
+  color: var(--ah-link);
+}
+
+.ah .ah-signin__demo:hover {
+  background: var(--ah-tone-blue-bg);
+}
+
+.ah .ah-signin__demo-note {
+  margin: -8px 0 0;
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ---------- Footer ---------- */
+
+.ah-public__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-block: clamp(14px, 2.4vh, 24px) clamp(16px, 3vh, 32px);
+  border-top: 1px solid var(--ah-border-strong);
+}
+
+.ah-public__footer-brand {
+  color: var(--ah-heading);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ah-public__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ah-public__links li {
+  display: flex;
+  align-items: center;
+}
+
+.ah-public__links li + li::before {
+  content: "";
+  width: 1px;
+  height: 16px;
+  margin: 0 16px;
+  background: var(--ah-border-strong);
+}
+
+.ah .ah-public__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border-radius: 6px;
+  color: var(--ah-text-muted);
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.ah .ah-public__links a:hover {
+  color: var(--ah-link);
+  text-decoration: underline;
+}
+
+.ah-public__external {
+  opacity: 0.7;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+  .ah-public__main {
+    grid-template-areas:
+      "intro"
+      "form"
+      "art";
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+  }
+
+  .ah-public__art {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .ah-public__header {
+    padding-block: 16px;
+  }
+
+  .ah-public__brand {
+    font-size: 22px;
+  }
+
+  .ah-public__mark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .ah-public__controls {
+    gap: 10px;
+  }
+
+  .ah-public__divider {
+    display: none;
+  }
+
+  .ah-signin {
+    border-radius: 16px;
+  }
+
+  .ah-public__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
