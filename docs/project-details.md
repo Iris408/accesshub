@@ -51,7 +51,7 @@ The backend provides:
 Backend repository:
 
 ```text
-https://github.com/Iris408/mini-user-api
+https://github.com/Iris408/secure-user-api
 ```
 
 ## Authentication Flow
@@ -120,7 +120,7 @@ AccessHub integrates with Secure User API.
 Related backend repository:
 
 ```text
-https://github.com/Iris408/mini-user-api
+https://github.com/Iris408/secure-user-api
 ```
 
 ## Learning Outcomes

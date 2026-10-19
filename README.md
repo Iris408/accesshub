@@ -17,7 +17,7 @@ Backend API:
 
 Related backend repository:
 
-- [Secure User API](https://github.com/Iris408/mini-user-api)
+- [Secure User API](https://github.com/Iris408/secure-user-api)
 
 ## Current Status
 
@@ -27,8 +27,8 @@ Related backend repository:
 | Login flow | ✅ Working |
 | JWT token storage | ✅ Working |
 | Protected dashboard | ✅ Working |
-| Admin-only user list | ✅ Working |
-| Role-based UI behaviour | ✅ Working |
+| Admin user management | ✅ Working |
+| Four-role permissions | ✅ Working |
 | Loading and error states | ✅ Complete |
 | Vercel deployment | ✅ Live |
 | Render backend integration | ✅ Live |
@@ -40,8 +40,13 @@ Related backend repository:
 - User login flow
 - JWT token storage
 - Protected dashboard route
-- Admin-only user list
-- Role-based access behaviour
+- Four roles — Admin, Manager, Member, Viewer / Auditor — with permissions
+  enforced by the API and reflected in the interface
+- User management for admins: add, edit role, deactivate, reactivate and
+  permanently delete, with accessible confirmation dialogs
+- One-time temporary passwords and a required password change at first sign-in
+- Users table with search, role and status filters, sorting and pagination
+- Light and dark themes and six interface languages
 - Authenticated API requests
 - API integration with deployed FastAPI backend
 - Multi-page frontend routing
@@ -112,7 +117,7 @@ More detailed project documentation is available in the `docs/` folder.
 
 | Document | Description |
 | --- | --- |
-| [Setup Guide](./docs/setup.md) | Local setup, environment variables, build commands, and demo notes |
+| [Setup Guide](./docs/setup.md) | Local setup, environment variables, build commands, and the isolated public demo |
 | [Auth Flow](./docs/auth-flow.md) | JWT login, token storage, protected routes, and admin-only access |
 | [Frontend Notes](./docs/frontend-notes.md) | Pages, UI behaviour, routing, loading states, and frontend improvements |
 | [Project Details](./docs/project-details.md) | Architecture, related backend, limitations, future improvements, and learning notes |
