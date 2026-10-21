@@ -123,7 +123,7 @@ describe("non-admin users", () => {
 
       renderAt(path);
 
-      expect(await screen.findByText("Admin role required")).toBeTruthy();
+      expect(await screen.findByText("The user directory isn't available for your role")).toBeTruthy();
       expect(callsTo(fetchMock, "/users")).toHaveLength(0);
     }
   );
@@ -289,28 +289,70 @@ describe("shell navigation", () => {
     ]);
   });
 
-  it("labels unsupported sections instead of linking to broken pages", async () => {
+  it("has no placeholder sections left; Settings explains it's for admins", async () => {
     signIn();
     mockApi({ "GET /profile": () => json({ user: member }) });
 
-    renderAt("/audit-log");
+    renderAt("/settings");
 
-    expect(
-      await screen.findByText("Audit Log isn't connected yet")
-    ).toBeTruthy();
+    expect(await screen.findByText("Only administrators can change settings")).toBeTruthy();
+    const main = screen.getByRole("navigation", { name: "Main" });
+    expect(within(main).queryByText("Soon")).toBeNull();
+    expect(within(main).getByRole("link", { name: /Settings/ }).textContent).toBe(
+      "Settings (admins only)"
+    );
   });
 
-  it("does not present activity events as live data", async () => {
+  it("shows the latest recorded activity from the API", async () => {
     signIn();
-    mockApi({
+    const fetchMock = mockApi({
       "GET /profile": () => json({ user: admin }),
       "GET /users": () => json(makeUsers(5)),
+      "GET /activity": () =>
+        json({
+          events: [
+            {
+              id: 3,
+              occurred_at: "2026-10-20T09:30:00+00:00",
+              event_type: "auth.sign_in",
+              outcome: "failure",
+              actor: null,
+              target: { type: "user", username: "jane.doe" },
+              details: { reason: "invalid_credentials" },
+            },
+          ],
+          total: 1,
+          page: 1,
+          page_size: 5,
+        }),
     });
 
     renderAt("/dashboard");
 
-    expect(await screen.findByText("Activity feed unavailable")).toBeTruthy();
-    expect(screen.getByText("Not connected")).toBeTruthy();
+    const panel = await screen.findByRole("region", { name: "Recent activity" });
+    expect(await within(panel).findByText("Sign-in")).toBeTruthy();
+    expect(within(panel).getByText("on jane.doe")).toBeTruthy();
+    expect(within(panel).getByRole("link", { name: "View all activity" }).getAttribute("href")).toBe(
+      "/activity"
+    );
+    const activityCall = fetchMock.mock.calls
+      .map(([input]) => new URL(String(input)))
+      .find((url) => url.pathname === "/activity");
+    expect(activityCall?.searchParams.get("page_size")).toBe("5");
+  });
+
+  it("explains when a role can't see activity, without asking the API", async () => {
+    signIn();
+    const fetchMock = mockApi({
+      "GET /profile": () => json({ user: member }),
+    });
+
+    renderAt("/dashboard");
+
+    expect(await screen.findByText("Organisation activity isn't available for your role")).toBeTruthy();
+    expect(
+      fetchMock.mock.calls.some(([input]) => new URL(String(input)).pathname === "/activity")
+    ).toBe(false);
   });
 });
 

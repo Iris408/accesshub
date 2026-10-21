@@ -130,7 +130,7 @@ describe("access to user management", () => {
       });
       renderAt("/admin");
 
-      expect(await screen.findByText("Admin role required")).toBeTruthy();
+      expect(await screen.findByText("The user directory isn't available for your role")).toBeTruthy();
       expect(screen.queryByRole("button", { name: "Add user" })).toBeNull();
       expect(requests("GET", "/users")).toHaveLength(0);
     }
@@ -142,7 +142,7 @@ describe("access to user management", () => {
     });
     renderAt("/admin");
 
-    expect(await screen.findByText("Admin role required")).toBeTruthy();
+    expect(await screen.findByText("The user directory isn't available for your role")).toBeTruthy();
     expect(requests("GET", "/users")).toHaveLength(0);
   });
 });

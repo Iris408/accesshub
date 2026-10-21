@@ -21,6 +21,8 @@ type I18nProviderProps = {
 
 function I18nProvider({ children }: I18nProviderProps) {
   const [locale, setLocaleState] = useState(readStoredLocale);
+  const [timeZone, setTimeZoneState] = useState<string | null>(null);
+  const setTimeZone = useCallback((next: string | null) => setTimeZoneState(next), []);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
@@ -33,8 +35,8 @@ function I18nProvider({ children }: I18nProviderProps) {
   }, []);
 
   const value = useMemo(
-    () => ({ ...createTranslator(locale), setLocale }),
-    [locale, setLocale]
+    () => ({ ...createTranslator(locale, timeZone), setLocale, setTimeZone }),
+    [locale, timeZone, setLocale, setTimeZone]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

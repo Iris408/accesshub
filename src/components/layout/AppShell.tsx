@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Outlet } from "react-router-dom";
 
@@ -27,26 +27,30 @@ function readCollapsed(): boolean {
   }
 }
 
+function PageLoading({ label }: { label: string }) {
+  return (
+    <div className="ah-page-loading" aria-busy="true">
+      <p className="ah-sr-only" role="status">
+        {label}
+      </p>
+      <span className="ah-skeleton ah-skeleton--heading" />
+      <span className="ah-skeleton ah-skeleton--text" />
+      <div className="ah-stats">
+        {Array.from({ length: 4 }, (_, index) => (
+          <span key={index} className="ah-skeleton ah-skeleton--card" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ProfileGate() {
   const { profile, retryProfile, signOut } = useAuth();
   const { t } = useI18n();
 
   switch (profile.status) {
     case "loading":
-      return (
-        <div className="ah-page-loading" aria-busy="true">
-          <p className="ah-sr-only" role="status">
-            {t("profile.loading")}
-          </p>
-          <span className="ah-skeleton ah-skeleton--heading" />
-          <span className="ah-skeleton ah-skeleton--text" />
-          <div className="ah-stats">
-            {Array.from({ length: 4 }, (_, index) => (
-              <span key={index} className="ah-skeleton ah-skeleton--card" />
-            ))}
-          </div>
-        </div>
-      );
+      return <PageLoading label={t("profile.loading")} />;
 
     case "error":
       return (
@@ -87,7 +91,14 @@ function ProfileGate() {
       );
 
     case "ready":
-      return profile.user.must_change_password ? <ChangePasswordForm /> : <Outlet />;
+      return profile.user.must_change_password ? (
+        <ChangePasswordForm />
+      ) : (
+        // Pages are loaded on demand (see App.tsx); the shell stays in place.
+        <Suspense fallback={<PageLoading label={t("shell.loadingPage")} />}>
+          <Outlet />
+        </Suspense>
+      );
   }
 }
 

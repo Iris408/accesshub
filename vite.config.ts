@@ -9,5 +9,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     restoreMocks: true,
+    // Let tests read the sign-in stylesheet as text (?raw) to check the
+    // illustration's animation rules; other CSS stays stubbed.
+    css: { include: [/public\.css/] },
   },
 })

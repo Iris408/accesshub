@@ -11,6 +11,7 @@ function renderDashboard(profile = admin) {
   mockApi({
     "GET /profile": () => json({ user: profile }),
     "GET /users": () => json(makeUsers(124)),
+    "GET /activity": () => json({ events: [], total: 0, page: 1, page_size: 5 }),
   });
   window.history.pushState(null, "", "/dashboard");
   return render(<App />);
@@ -67,7 +68,7 @@ describe("language menu", () => {
     expect(screen.getByRole("button", { name: "サインアウト" })).toBeTruthy();
     expect(screen.getByLabelText("ロール")).toBeTruthy();
     expect(screen.getByText("124 人中 1–10 人を表示")).toBeTruthy();
-    expect(screen.getByText("アクティビティフィードは利用できません")).toBeTruthy();
+    expect(await screen.findByText("アクティビティはまだありません")).toBeTruthy();
 
     // Usernames and IDs come from the API and are never translated.
     expect(screen.getByRole("cell", { name: /user001/ })).toBeTruthy();
@@ -140,11 +141,11 @@ describe("language menu", () => {
     expect(alert.textContent).toContain("Admin access required");
   });
 
-  it("translates the admin-required message for non-admins", async () => {
+  it("translates the user-directory message for roles without access", async () => {
     localStorage.setItem("accesshub.language", "ko");
     renderDashboard({ id: 7, username: "member", role: "user" });
 
-    expect(await screen.findByText("관리자 역할이 필요합니다")).toBeTruthy();
+    expect(await screen.findByText("이 역할에서는 사용자 디렉터리를 사용할 수 없습니다")).toBeTruthy();
     expect(screen.getByText("멤버", { selector: "strong" })).toBeTruthy();
   });
 });

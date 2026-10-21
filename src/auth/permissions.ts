@@ -6,13 +6,15 @@ export type Permission =
   | "users:manage"
   | "access_requests:submit"
   | "access_requests:review"
-  | "activity:read_team"
-  | "activity:read_all"
-  | "audit:read";
+  | "activity:read"
+  | "audit:read"
+  | "roles:manage"
+  | "settings:manage";
 
 /**
- * Same matrix as app/permissions.py. Only used when the API doesn't send
- * `permissions` on /profile (older deployments); the API's list wins.
+ * The API's default policy (DEFAULT_ROLE_PERMISSIONS in app/permissions.py).
+ * Only used when the API doesn't send `permissions` on /profile (older
+ * deployments); the API's list — which reflects the configured policy — wins.
  */
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   admin: [
@@ -20,13 +22,15 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "users:manage",
     "access_requests:submit",
     "access_requests:review",
-    "activity:read_team",
-    "activity:read_all",
+    "activity:read",
     "audit:read",
+    "roles:manage",
+    "settings:manage",
   ],
-  manager: ["access_requests:submit", "access_requests:review", "activity:read_team"],
+  manager: ["access_requests:submit", "access_requests:review", "activity:read"],
   member: ["access_requests:submit"],
-  viewer: ["activity:read_all", "audit:read"],
+  // audit:read is Admin-only by policy.
+  viewer: ["activity:read"],
 };
 
 export function permissionsFor(profile: Profile | null): ReadonlySet<string> {

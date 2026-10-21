@@ -3,10 +3,11 @@ import {
   useEffect,
   useEffectEvent,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { ApiError, fetchProfile, isAbortError } from "../api/client";
 import { AuthContext, type ProfileState } from "./context";
@@ -24,6 +25,14 @@ function profileErrorState(error: unknown): ProfileState {
   };
 }
 
+/**
+ * Permissions can change while someone is signed in (an Admin edits the role
+ * policy or their role). The profile is re-read when they move to another page
+ * or return to the window, at most this often, so navigation and page access
+ * follow without signing out. The API still checks every request.
+ */
+const PROFILE_REFRESH_MS = 5000;
+
 type AuthProviderProps = {
   children: ReactNode;
 };
@@ -33,6 +42,9 @@ function AuthProvider({ children }: AuthProviderProps) {
   const [token] = useState(getToken);
   const [profile, setProfile] = useState<ProfileState>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
+  const location = useLocation();
+  // When the profile was last loaded successfully (0 = not loaded yet).
+  const loadedAtRef = useRef(0);
 
   const signOut = useCallback(() => {
     clearToken();
@@ -57,10 +69,10 @@ function AuthProvider({ children }: AuthProviderProps) {
 
     const controller = new AbortController();
 
-    fetchProfile(token, controller.signal).then(
-      (user) => setProfile({ status: "ready", user }),
-      handleProfileError
-    );
+    fetchProfile(token, controller.signal).then((user) => {
+      loadedAtRef.current = Date.now();
+      setProfile({ status: "ready", user });
+    }, handleProfileError);
 
     return () => controller.abort();
   }, [token, attempt]);
@@ -77,12 +89,31 @@ function AuthProvider({ children }: AuthProviderProps) {
     if (!token) return;
 
     fetchProfile(token).then(
-      (user) => setProfile({ status: "ready", user }),
+      (user) => {
+        loadedAtRef.current = Date.now();
+        setProfile({ status: "ready", user });
+      },
       (error: unknown) => {
         if (error instanceof ApiError && error.kind === "unauthorized") signOut();
       }
     );
   }, [token, signOut]);
+
+  const refreshIfStale = useCallback(() => {
+    if (loadedAtRef.current === 0) return;
+    if (Date.now() - loadedAtRef.current < PROFILE_REFRESH_MS) return;
+    loadedAtRef.current = Date.now();
+    refreshProfile();
+  }, [refreshProfile]);
+
+  useEffect(() => {
+    refreshIfStale();
+  }, [location.pathname, refreshIfStale]);
+
+  useEffect(() => {
+    window.addEventListener("focus", refreshIfStale);
+    return () => window.removeEventListener("focus", refreshIfStale);
+  }, [refreshIfStale]);
 
   const value = useMemo(() => {
     const user = profile.status === "ready" ? profile.user : null;

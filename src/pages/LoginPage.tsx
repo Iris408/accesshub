@@ -6,6 +6,7 @@ import { demoApiUrl } from "../api/config";
 import { setToken } from "../auth/session";
 import LanguageMenu from "../components/layout/LanguageMenu";
 import AccessIllustration from "../components/public/AccessIllustration";
+import RoleStrip from "../components/public/RoleStrip";
 import { PROJECT_LINKS } from "../components/public/projectLinks";
 import ThemeSwitch from "../components/public/ThemeSwitch";
 import Icon from "../components/ui/Icon";
@@ -230,6 +231,11 @@ function LoginPage() {
             )}
           </form>
         </section>
+
+        {/* Small screens: a compact role strip under the form (see public.css). */}
+        <div className="ah-public__roles">
+          <RoleStrip />
+        </div>
       </main>
 
       <footer className="ah-public__footer">

@@ -52,7 +52,8 @@ function DataTable<T, K extends string>({
   }
 
   return (
-    <div className="ah-table-scroll">
+    // Focusable and labelled so keyboard users can scroll a wide table.
+    <div className="ah-table-scroll" role="region" aria-label={caption} tabIndex={0}>
       <table className="ah-table">
         <caption className="ah-sr-only">{caption}</caption>
         <thead>
