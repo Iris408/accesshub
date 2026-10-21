@@ -9,7 +9,7 @@ AccessHub is a React and TypeScript authentication frontend connected to a deplo
 
 Frontend:
 
-- [AccessHub](https://jwt-authentication-dashboard-sepia.vercel.app)
+- [AccessHub](https://accesshub-iris408.vercel.app)
 
 Backend API:
 
@@ -70,19 +70,26 @@ Related backend repository:
 - Vercel deployment
 - Frontend and Docker CI workflows
 
+## Maintenance Backlog
+
+- Add a guarded, operator-run reset for the hosted demo. It should restore
+  demo-owned users, sample access requests, role permissions and organisation
+  settings to their defaults; refuse production or an unexpected database;
+  and preserve the append-only audit history.
+
 ## Screenshots
 
-### Login Page
+### Sign-in
 
-<img src="./screenshots/accesshub-overview.png" width="700"/>
+| Desktop | Mobile |
+| --- | --- |
+| <img src="./screenshots/login-desktop.png" alt="AccessHub desktop sign-in page" width="700"/> | <img src="./screenshots/login-mobile.png" alt="AccessHub mobile sign-in page" width="300"/> |
 
-### Protected Dashboard
+### Admin dashboard
 
-<img src="./screenshots/accesshub-dashboard.png" width="700"/>
-
-### Admin Panel
-
-<img src="./screenshots/accesshub-admin-panel.png" width="700"/>
+| Light theme | Dark theme |
+| --- | --- |
+| <img src="./screenshots/dashboard-light.png" alt="AccessHub admin dashboard in light theme" width="700"/> | <img src="./screenshots/dashboard-dark.png" alt="AccessHub admin dashboard in dark theme" width="700"/> |
 
 ## Tech Stack
 
@@ -112,6 +119,7 @@ Create a `.env` file:
 
 ```env
 VITE_API_URL=https://mini-user-api.onrender.com
+VITE_DEMO_API_URL=https://accesshub-demo-api.onrender.com
 ```
 
 Run locally:

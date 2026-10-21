@@ -1,6 +1,6 @@
 # Setup Guide
 
-This document explains how to run AccessHub locally.
+This guide explains how to install, configure and run the AccessHub frontend.
 
 ## Installation
 
@@ -19,19 +19,28 @@ npm install
 
 ## Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env.local` file in the **project root**—the same folder as `package.json`. Do not put it in `src/`.
+
+For the deployed APIs:
 
 ```env
 VITE_API_URL=https://mini-user-api.onrender.com
+VITE_DEMO_API_URL=https://accesshub-demo-api.onrender.com
 ```
 
-For local backend testing, use the local Secure User API URL:
+`VITE_API_URL` is the regular API used for username-and-password sign-in. `VITE_DEMO_API_URL` is optional and enables the **Use demo account** button.
+
+For a local production API:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8002
 ```
 
-Never commit real `.env` files or secrets to GitHub.
+The demo API can point to a separately running demo backend, or to the hosted demo API if you intend to use that shared demo.
+
+These values are base URLs: include `https://` or `http://`, but do not add a comma, `localhost` by itself, or an endpoint path such as `/demo/session`. Keep `.env.local` out of Git.
+
+After changing environment variables, restart the local development server. Vite reads them when it starts. In Vercel, save the variables in the project’s Environment Variables settings and redeploy for the changes to take effect.
 
 ## Run Locally
 
@@ -41,13 +50,19 @@ Start the development server:
 npm run dev
 ```
 
-For local testing on a specific port:
+Vite prints the local address in the terminal, usually:
+
+```text
+http://localhost:5173
+```
+
+To choose a specific port:
 
 ```bash
 npm run dev -- --host 0.0.0.0 --port 5175
 ```
 
-The frontend is then available at:
+The frontend will then be available at:
 
 ```text
 http://localhost:5175
@@ -61,31 +76,18 @@ Run:
 npm run build
 ```
 
-This verifies that the React, TypeScript, and Vite frontend builds successfully.
+This type-checks and builds the React, TypeScript and Vite frontend.
 
-## Public Demo
+## Demo
 
-AccessHub never shows or ships demo credentials. The sign-in page offers
-**Use demo account** only when a separate, isolated demo API is configured:
+AccessHub does not display or ship demo credentials. The **Use demo account** button appears only when a separate demo API is configured with `VITE_DEMO_API_URL`.
 
-```env
-VITE_API_URL=https://your-production-api.example.com
-VITE_DEMO_API_URL=https://your-demo-api.example.com
-```
+- The demo API must be a separate deployment with its own database. It must run with `APP_ENV=demo`, use its own `SECRET_KEY`, and be seeded as described in the backend [Setup Guide](https://github.com/Iris408/secure-user-api/blob/main/docs/setup.md#seeding-the-demo-database-on-render).
+- The button calls `POST /demo/session` on the demo API without a username or password. All requests made during that demo session go only to the demo API. Regular sign-ins continue to use `VITE_API_URL`.
+- The demo API refuses to start a demo session if its database contains a non-demo account. The button is hidden when the demo URL is unset or matches the regular API URL.
+- The hosted demo is shared. Changes made during a demo session can affect what later visitors see. A reset process is on the maintenance backlog; running the seed command again does not reset changed settings or permissions.
 
-- The demo API must be its own deployment with its own database, running
-  with `APP_ENV=demo` and seeded with `python -m scripts.seed_demo_users`
-  (124 synthetic users plus the `adminDemoUser` demo admin). It also needs its own
-  `SECRET_KEY`, different from production.
-- **Use demo account** calls `POST /demo/session` on the demo API — no
-  username or password is involved — and the session's requests then go only
-  to that API. Real sign-ins always use `VITE_API_URL`.
-- The demo API refuses demo sessions whenever its database contains any
-  non-demo account, and the button is hidden if `VITE_DEMO_API_URL` is unset
-  or equal to `VITE_API_URL`.
-
-Without `VITE_DEMO_API_URL` the button is not shown; sign in with an account
-created by an administrator.
+If the demo button does not appear, check that `VITE_DEMO_API_URL` is set in the project root or Vercel settings and points to the separate demo API. For local development, restart the Vite server after changing the value.
 
 ## Backend Dependency
 
@@ -105,16 +107,14 @@ https://mini-user-api.onrender.com/docs
 
 ## Deployment Architecture
 
-The deployed application uses:
+The frontend and backend are deployed independently:
 
 ```text
-AccessHub
-Vercel Frontend
-      ↓
-Secure User API
-Render Backend
-      ↓
+AccessHub frontend (Vercel)
+        ↓
+Secure User API (Render)
+        ↓
 PostgreSQL
 ```
 
-The frontend and backend are deployed independently and communicate through the configured `VITE_API_URL`.
+The frontend’s `VITE_API_URL` and optional `VITE_DEMO_API_URL` determine which API receives its requests. The demo API uses a separate database from the production API.

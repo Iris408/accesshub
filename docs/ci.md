@@ -1,69 +1,72 @@
 # CI Notes
 
-This document explains the continuous integration checks used by AccessHub.
+This document describes the automated checks for the AccessHub frontend
+repository.
 
-## Current CI Workflows
+## Workflows
 
-AccessHub includes two GitHub Actions workflows:
+AccessHub has two GitHub Actions workflows:
 
-- Frontend CI
-- Docker CI
+- **Frontend CI** checks lint, tests and the production build.
+- **Docker CI** builds the repository’s Docker image.
 
-These workflows validate the frontend application and container configuration when changes are made to the repository.
+Both workflows run on pushes to `main` and on pull requests targeting `main`.
 
 ## Frontend CI
 
-Frontend CI checks include:
+The workflow uses Node.js 22 and runs:
 
-- Checking out the repository
-- Setting up Node.js
-- Installing frontend dependencies
-- Running TypeScript and build checks
-- Confirming the Vite frontend builds successfully
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+```
 
-This helps catch dependency, TypeScript, and build issues before changes are considered complete.
+The build command runs the TypeScript project build and then creates the Vite
+production bundle. The test command runs the Vitest suite.
+
+A successful workflow checks that dependencies install, lint passes, tests
+pass, TypeScript compiles and the frontend can be built.
 
 ## Docker CI
 
-Docker CI checks include:
+Docker CI builds the image from the repository root:
 
-- Checking out the repository
-- Building the Docker image
-- Validating the Docker configuration
-- Confirming the container build completes successfully
+```bash
+docker build -t accesshub .
+```
 
-This helps ensure AccessHub remains buildable as a container after repository changes.
+This verifies that the Docker image can be built. It does not deploy the image
+or test a connection to either hosted API.
 
-## Why CI Matters
+## Running checks locally
 
-Continuous integration provides automated validation as the project is maintained.
+From the AccessHub project root:
 
-The current workflows help confirm that:
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+docker build -t accesshub .
+```
 
-- Frontend dependencies install successfully
-- React and TypeScript code builds successfully
-- The Vite production build remains valid
-- Docker configuration remains buildable
-- Maintenance changes do not introduce obvious build failures
+Run the frontend checks before pushing changes or opening a pull request.
 
 ## Deployment
 
-AccessHub is deployed on Vercel and integrates with Secure User API deployed on Render.
+GitHub Actions validates changes; it does not deploy the frontend or backend.
 
-Deployment is currently separate from the GitHub Actions CI workflows.
-
-The repository therefore describes its automation as **CI**, rather than CI/CD.
+The frontend is hosted on Vercel. The production and demo APIs are separate
+services hosted on Render. Deployment behavior is configured in those hosting
+projects, so check their deployment status after merging or pushing changes to
+`main`. A green CI result means the repository checks passed; it does not by
+itself confirm that a deployment is live or that the frontend can reach the
+APIs.
 
 ## Maintenance
 
-The current CI workflows cover the core build-validation requirements for AccessHub.
-
-Future maintenance may include:
-
-- Frontend test integration
-- Authentication flow tests
-- Route rendering tests
-- Dependency and security checks
-- Coverage reporting
-
-Automated deployment is not part of the current AccessHub maintenance scope.
+Keep the workflows aligned with the project’s actual scripts and supported
+Node.js version. When adding a check, make sure it can run reliably in GitHub
+Actions and document the equivalent local command here.
