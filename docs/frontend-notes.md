@@ -1,37 +1,37 @@
 # Frontend Notes
 
-This document contains frontend-specific implementation notes for AccessHub.
+This document describes AccessHub’s frontend pages, behavior and maintenance.
 
 ## Pages
 
 | Page | Route | Description |
 | --- | --- | --- |
-| Sign in | `/` | Public sign-in page with language menu, light/dark switch and an optional isolated demo |
-| Dashboard | `/dashboard` | Access overview: summary cards, users table and the five latest activity events |
-| Users | `/admin` | User directory and admin user management |
+| Sign in | `/` | Sign-in page with language and theme controls, plus an optional isolated demo |
+| Dashboard | `/dashboard` | Access overview, users table and latest activity |
+| Users | `/admin` | User directory and user management for roles with permission |
 | Help & support | `/help` | Answers to common sign-in and access questions |
-| Audit Log | `/audit-log` | Read-only audit events for admins, with filters and details |
-| Access Requests | `/access-requests` | Request a role change; reviewers see new requests, the queue and decision history |
-| Roles | `/roles` | Admin-only permission matrix for the four roles |
-| Activity | `/activity` | Organisation sign-ins and access events (`activity:read`) |
+| Audit Log | `/audit-log` | Read-only audit events for Admins, with filters and details |
+| Access Requests | `/access-requests` | Submit a role request or review requests, depending on permissions |
+| Roles | `/roles` | Admin-only permission matrix |
+| Activity | `/activity` | Organisation sign-ins and access events for roles with `activity:read` |
 | Settings | `/settings` | Admin-only organisation settings |
 
-All pages except sign-in require a token and live inside the authenticated
-shell (sidebar, top bar). Unknown routes show a "Page not found" page.
+All pages except sign-in require a session and use the authenticated shell
+(sidebar and top bar). Unknown routes show a “Page not found” page.
 
 ## Main Frontend Responsibilities
 
-- Sign-in form, validation and error messages
-- JWT access token storage (`localStorage`, key `token`)
-- Profile loading, permission checks and session handling (401 ends the session)
-- Users table: search, role and status filters, sorting and pagination
-- Admin user management: create, edit role, deactivate, reactivate, delete
-- Access requests: submitting, reviewing, approving and declining
-- Role permission matrix for Admins
-- Organisation activity feed
+- Sign-in, demo-session startup, form validation and error messages
+- Session token storage and authenticated API requests
+- Profile loading, permission-based navigation and session handling
+- User directory search, filters, sorting and pagination
+- User creation, role changes, deactivation, reactivation and deletion
+- Access request submission, review and decision history
+- Role permission configuration for Admins
+- Activity feed and Admin-only Audit Log
 - Organisation settings
-- Temporary-password change at first sign-in
-- Light/dark theme and six interface languages
+- Required password changes for temporary passwords
+- Light and dark themes and six interface languages
 - Loading, empty, error and access-denied states
 
 ## Project Structure
@@ -39,216 +39,198 @@ shell (sidebar, top bar). Unknown routes show a "Page not found" page.
 ```text
 accesshub/
   src/
-    api/client.ts          Typed API client (all backend requests)
-    auth/                  Auth context, roles, permissions, token storage
+    api/client.ts          Typed API client and API URL selection
+    auth/                  Auth context, roles, permissions and token storage
     components/
-      auth/                Change-password form
-      dashboard/           Activity panel
-      layout/              App shell, sidebar, top bar, language menu
-      public/              Sign-in page illustration, theme switch, links
-      ui/                  Shared components (dialog, menu, table, icons…)
-      users/               Users table, panel and management dialogs
-    hooks/                 useUsers, useTheme, useMediaQuery
-    i18n/                  Translation runtime and one dictionary per language
-    pages/                 Route components
-    test/                  Test setup and API mocks
-    dashboard.css          Theme tokens and app shell styles
-    public.css             Sign-in page layout
+      activity/            Activity feed items
+      audit/                Audit details and event labels
+      auth/                 Change-password form
+      dashboard/            Recent activity panel
+      layout/               App shell, sidebar, top bar and language menu
+      public/               Sign-in illustration, role strip and theme switch
+      requests/             Request form, queue and review dialogs
+      roles/                Permission matrix and labels
+      ui/                   Shared dialogs, tables, icons and controls
+      users/                User table, panel and management dialogs
+    hooks/                  API resources, audit events, users and UI hooks
+    i18n/                   Translation runtime and six language dictionaries
+    organisation/           Organisation settings context
+    pages/                  Route-level page components
+    test/                   Test setup and API mocks
+    dashboard.css           Theme tokens and authenticated app styles
+    public.css              Sign-in page and role illustration styles
   docs/
   screenshots/
 ```
 
 ## Frontend Implementation
 
-### Sign-in
+### Sign-in and demo session
 
-The sign-in page sends `POST /login` with `{ username, password }` and stores the
-returned `access_token`. It checks that both fields are filled in before
-calling the API, shows a "Signing in…" state, and translates the API's known
-errors. When an isolated demo API is configured (`VITE_DEMO_API_URL`),
-**Use demo account** opens a credential-free session on that API only; see
-[Setup Guide](./setup.md#public-demo).
+Regular sign-in sends `POST /login` with `{ username, password }` to the
+production API and stores the returned access token.
 
-### Protected Routes and Roles
+When `VITE_DEMO_API_URL` is configured, **Use demo account** starts a
+credential-free session through the demo API. Authenticated requests in that
+session continue to use the demo API; they are not sent to the production API.
+The demo account is `adminDemoUser`. Seeded demo accounts cannot sign in with
+a password.
 
-Authenticated pages load `GET /profile`, which returns the user's role and
-permissions. The interface uses those permissions to decide what to show; the
-API enforces them. See [Auth Flow](./auth-flow.md) for roles and session rules.
+The sign-in page uses a two-column layout on tablet and desktop, and a compact
+layout with a role strip on phones. Its role-card animation respects the
+operating system’s reduced-motion setting. See the
+[Setup Guide](./setup.md#public-demo) for environment setup.
 
-### Themes and Languages
+### Protected routes and roles
 
-The theme follows the system preference until the user picks one; the choice
-and the selected language (English, 日本語, 한국어, Français, Español, 简体中文)
-are remembered in `localStorage`. Every locale must define the same keys as the
-English dictionary — the build and tests fail otherwise.
+The app loads `GET /profile` to obtain the current role and permissions. The
+frontend uses them to display navigation and page controls; the API enforces
+access on every request. A session ends when the API returns `401`. See
+[Auth Flow](./auth-flow.md) for details.
 
-### Audit Log
+### Themes and languages
 
-The Audit Log page reads `GET /audit-events` (admins only; others see an
-access-denied message and no request is sent). Filters — username search,
-event type, outcome and a local-date range — and pagination are applied by the
-API. Each row has a **Details** button that opens a dialog with every recorded
-field, translated where the value is a known code. The page offers no way to
-change or delete events. Event, outcome and reason labels live in
-`src/components/audit/auditLabels.ts`; unknown values from a newer API are
-shown as their raw code.
+The theme follows the system preference until the user chooses one. The
+selected theme and language are remembered in `localStorage`. The supported
+languages are English, Japanese, Korean, French, Spanish and Simplified
+Chinese.
+
+Every language dictionary must define the same keys as the English
+dictionary; tests check translation consistency.
+
+### Users
+
+The Users page shows the directory to roles that have `users:read`. User
+management actions require the API’s corresponding permission. The page
+supports search, role and status filters, sorting and pagination.
+
+Admins can create users, change roles, deactivate or reactivate accounts, and
+delete users. A generated temporary password is shown once, and the user must
+change it at first sign-in.
 
 ### Access Requests
 
-What the page shows follows the profile's permissions; the API enforces the
-same rules and the page never assumes a request will be allowed.
+The page follows the current profile permissions, and the API independently
+enforces the same rules.
 
-- **Members and Managers** (`access_requests:submit`, not Admins) get a
-  request form — role (never Admin or their current role) and a reason — and
-  their own requests from `GET /access-requests/mine`. While a request is
-  pending the form is replaced by a notice, since the API allows one at a time.
-- **Managers and Admins** (`access_requests:review`) get a **New requests**
-  box (`GET /access-requests/summary`: pending count and the five newest) and
-  the full queue (`GET /access-requests`) with requester search, status,
-  requested role and local-date range filters plus pagination, all applied by
-  the API. "View all pending" filters the queue to pending and moves focus to it.
-- **Viewer / Auditor** accounts see an explanation and no queue requests are
-  sent. If they have past requests (e.g. a Member whose request for Viewer /
-  Auditor was approved), their history is still shown.
-- **Review dialog:** every field, then Approve / Decline with an optional note
-  when the API's `can_decide` is true. Otherwise it explains why
-  (`decision_block_reason`), e.g. only admins can decide Manager requests or
-  you can't review your own. A `409`/`404` (already decided elsewhere)
-  shows a message and refreshes the lists.
-- For pending requests the role change reads current role → requested role;
-  for decided requests it uses the role at submission, because an approval has
-  already changed the current role.
-- Synthetic seed requests (`is_seed`) carry a **Demo** badge.
-- Loading, empty, no-matches, error/retry, forbidden (the API's message) and
-  expired-session (signs out) states are handled by `src/hooks/useApiResource.ts`.
+- Roles with `access_requests:submit` can request an allowed role other than
+  their current role. Admins cannot submit requests. The form is replaced by
+  a notice while a request is pending; the API also prevents duplicate
+  pending requests.
+- Roles with `access_requests:review` see a **New requests** summary and the
+  full request queue. The queue supports requester search, status, requested
+  role and date filters, plus pagination.
+- Users can see their own request history. Viewer / Auditor accounts can see
+  their history when they have one, but cannot submit or review requests.
+- Reviewers can approve or decline when permitted. The UI explains cases they
+  cannot decide, such as a request for Manager access that requires an Admin.
+  If a request was already decided elsewhere, the page reports that and
+  refreshes the lists.
+- Seeded synthetic requests have a **Demo** badge.
 
-Components live in `src/components/requests/`; status, block-reason and error
-labels are in `requestLabels.ts`.
+The request form also follows the organisation’s request policy. When
+requests are disabled, users see a notice instead of the form.
 
 ### Roles
 
-The Roles page reads `GET /role-permissions` and saves with
-`PUT /role-permissions` (Admins only: other roles see an explanation and no
-request is sent). Capabilities are rows and roles are columns.
+The Roles page reads `GET /role-permissions` and saves changes with
+`PUT /role-permissions`. It is Admin-only.
 
-- Editable cells are checkboxes labelled "Allow “capability” for role", with
-  the capability's description as their accessible description. Changed cells
-  are highlighted and counted; **Save changes** and **Cancel** stay disabled
-  until something changes.
-- Locked cells show allowed/not allowed, a lock and a rule number. The
-  numbered **Protected rules** list below explains each rule (Admin keeps every
-  permission; user management, the audit log and the policy are Admin-only;
-  Viewer / Auditor is read-only; Members always keep request access), and
-  screen readers hear the reason in the cell. The role-based rule that only
-  Admins decide Manager requests is listed too.
-- Saving sends the complete matrix with the `version` it was based on. On
-  success the page reloads the matrix from the API and shows a notice; a
-  `422` shows the API's reason and keeps the unsaved changes; a `409` explains
-  that someone else saved first and offers **Reload latest** (which discards
-  the unsaved changes). The page never shows success unless the API accepted
-  the change.
-- Activity permissions are not shown: they have no effect yet.
-- On phones the capability column stays in place while the role columns
-  scroll.
+Editable cells are shown as checkboxes. Protected cells explain why they
+cannot be changed, including the rules that Admin retains full access and
+that user management, the Audit Log, role permissions and Settings remain
+Admin-only. Saving uses the policy version that was loaded. If another Admin
+has already saved, the page offers to reload the latest matrix.
 
-Labels live in `src/components/roles/permissionLabels.ts`; unknown
-permissions from a newer API are shown as their code.
+In a demo session, a notice explains that saved permission changes are shared
+with other demo visitors.
 
 ### Activity
 
-The Activity page reads `GET /activity`, available to anyone whose profile
-lists `activity:read` (by default Admin, Manager and Viewer / Auditor; others
-see an explanation and no request is sent). It is a feed rather than a table:
-events are grouped by local day, each showing the event, outcome, who did it,
-what it affected and a short reason, with a **Details** button that opens the
-same accessible dialog as the Audit Log. Because the API sends a smaller,
-display-safe projection, the dialog shows fewer fields than the Admin-only
-Audit Log. Filters (username search, event type, outcome, local-date range)
-and pagination (30 per page) are applied by the API. The dashboard's
-**Recent activity** panel shows the five latest events from the same
-endpoint and links to the page.
+The Activity page reads `GET /activity`. Access requires `activity:read`,
+which is enabled by default for Admin, Manager and Viewer / Auditor. Admins
+can change the Manager, Member and Viewer / Auditor settings on the Roles
+page. Members do not have access by default.
+
+The feed groups events by the organisation’s configured timezone and supports
+username, event type, outcome and date filters. It shows a display-safe set of
+event details. The dashboard’s **Recent activity** panel shows the latest
+events from the same endpoint.
+
+The demo Activity feed contains events generated by actual demo use. It is
+not prefilled with fabricated history.
+
+### Audit Log
+
+The Audit Log reads `GET /audit-events` and is Admin-only. Other roles see an
+access-denied message without the page requesting audit data.
+
+Filters include username, event type, outcome and date range, with
+server-side pagination. A **Details** dialog shows the recorded fields.
+Events cannot be edited or deleted through the frontend. The database also
+enforces append-only behavior.
+
+The demo Audit Log starts empty and records real events from demo use.
 
 ### Settings
 
-The Settings page reads `GET /settings` and saves with `PUT /settings`
-(Admins only; others see an explanation and no request is sent). It has three
-groups — Organisation (name, timezone), Access requests (on/off, requestable
-roles) and Sessions (length) — each explaining its effect. Saving sends every
-setting with the `revision` it was based on; success is shown only after the
-API accepts it, then the values are re-read. A `422` shows the API's reason
-and keeps the edits; a `409` offers **Reload latest**. The page checks the
-name length and that at least one role is requestable before sending.
+The Settings page reads `GET /settings` and saves with `PUT /settings`. It is
+Admin-only. Settings cover the organisation name, timezone, access request
+policy and session length.
+
+Saving submits the complete settings set and its revision. A stale save is
+rejected, and the page offers to reload the latest values. Successful setting
+changes are recorded in the Audit Log and Activity feed.
+
+In a demo session, a notice explains that saved settings are shared with other
+demo visitors.
 
 ### Organisation settings across the app
 
-`OrganisationProvider` (inside `AuthProvider`) loads `GET /organisation`
-whenever the profile loads or refreshes (navigation, window focus, after a
-403) and right after an Admin saves settings, so changes reach open sessions
-without a reload:
+The organisation context loads settings for the signed-in session and
+refreshes them when the profile is refreshed or an Admin saves changes.
 
-- **Name** — shown under the logo in the sidebar.
-- **Timezone** — passed to the i18n formatters (`createTranslator(locale,
-  timeZone)`), so every date and time, Activity's day groups and the date
-  filters on Audit Log, Activity and Access Requests use it. Without one (the
-  default) they use the viewer's own timezone. Signing out resets it.
-- **Access request policy** — the request form only offers allowed roles,
-  and shows a notice instead of the form when requests are off. If the API
-  refuses a request because the policy changed, the policy is re-read.
+- **Organisation name:** displayed in the sidebar.
+- **Timezone:** used for displayed dates and times, Activity day groups, and
+  date filters on Activity, Audit Log and Access Requests. If no timezone is
+  configured, the viewer’s local timezone is used.
+- **Access request policy:** controls which roles may be requested and
+  whether new requests can be submitted.
+
+### API integration
+
+Requests go through `src/api/client.ts`. It attaches the bearer token and
+selects the API base URL according to the session: regular sessions use
+`VITE_API_URL`; demo sessions use `VITE_DEMO_API_URL`.
+
+API errors are converted to typed errors, including unauthorized, forbidden,
+conflict, invalid input, not found, network and server errors. Pages use these
+to show the appropriate message or session behavior.
 
 ### Route-level code splitting
 
-Every signed-in page is loaded with `React.lazy` (see `src/App.tsx`); the
-sign-in page stays in the main bundle so the first screen needs no extra
-request. `AppShell` wraps the routed page in `Suspense`, so the sidebar and
-top bar stay in place while a page's chunk loads.
+Authenticated pages load on demand with `React.lazy`. The sign-in page remains
+in the initial bundle. While a page loads, the sidebar and top bar stay in
+place.
 
 ### Permission changes during a session
 
-The API is authoritative and checks the current policy on every request. To
-keep the interface in step, `AuthProvider` re-reads `/profile` when the user
-moves to another page or returns to the window (at most every 5 seconds), and
-immediately whenever a page gets `403` from the API. Navigation locks and page
-access then follow the new permissions without signing out or reloading.
-
-### API Integration
-
-All requests go through `src/api/client.ts`, which adds the bearer token and
-turns error responses into typed errors (`unauthorized`, `forbidden`,
-`conflict`, `invalid`, `notFound`, `network`, `server`).
-
-## UI
-
-AccessHub is intentionally designed as a focused authentication and access-management interface rather than a larger general-purpose application.
-
-The interface demonstrates:
-
-- Authentication flow
-- Protected route behaviour
-- Role-based access
-- Admin-only functionality
-- Backend API integration
-- Loading and error feedback
-- Responsive dashboard presentation
-
-## Completed Improvements
-
-The current frontend includes:
-
-- Illustrated sign-in page with language menu and light/dark switch
-- Dashboard with summary cards, users table and activity panel
-- Four-role permissions and admin user management
-- Access requests workflow with review queue and decision history
-- Configurable role permissions with protected rules
-- Environment-based API URL handling
-- Loading states
-- Error handling
-- Admin users API integration
-- Secure User API role checking
-- Responsive styling
-- AccessHub product branding
+The API checks current permissions on every request. The frontend refreshes
+the profile when a user changes page, returns to the window or receives a
+`403`, so navigation and page access update without requiring sign-out.
 
 ## Maintenance
 
-The frontend is feature-complete for the current AccessHub portfolio scope.
+The shared demo is intentionally changeable. Demo visitors can make changes
+to users, permissions and settings, and create requests and activity.
 
-Ongoing work should focus on maintenance rather than feature expansion, including dependency updates, compatibility fixes, test coverage, security review, and documentation accuracy.
+**Planned maintenance:** establish and document a repeatable way to restore
+the demo to its intended baseline. The reset plan should cover demo users,
+role permissions, settings and seeded access requests. Decide explicitly how
+to handle the append-only Audit Log and real Activity events, which should not
+be silently rewritten as fake history. Until a reset procedure is implemented
+and reviewed, restore the demo only through a deliberate, verified process
+against the dedicated demo database.
+
+Other maintenance includes dependency updates, compatibility fixes, security
+review, test coverage and keeping documentation accurate.
