@@ -187,6 +187,9 @@ describe("demo session isolation", () => {
   });
 
   it("refuses a demo session when no demo API is configured", async () => {
+    // Explicit, so a developer's .env.local can't change the outcome.
+    vi.stubEnv("VITE_API_URL", "https://api.example.test");
+    vi.stubEnv("VITE_DEMO_API_URL", "");
     const fetchMock = mockApi({});
     setToken("demo.jwt", "demo");
 
@@ -197,6 +200,8 @@ describe("demo session isolation", () => {
   });
 
   it("can't start a demo session without a configured demo API", async () => {
+    vi.stubEnv("VITE_API_URL", "https://api.example.test");
+    vi.stubEnv("VITE_DEMO_API_URL", "");
     const fetchMock = mockApi({});
 
     const error = await expectApiError(startDemoSession());

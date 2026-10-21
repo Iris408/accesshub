@@ -34,6 +34,10 @@ function PersonGlyph({ cx, cy, size }: { cx: number; cy: number; size: number })
  * Decorative: people connected to roles, and roles to resources. Colours come
  * from theme tokens so it follows light/dark mode; the role labels use the
  * translated role names.
+ *
+ * The role cards take turns (Admin, Manager, Viewer / Auditor) to lift gently
+ * and highlight, on a slow CSS loop in public.css. It's ambient and hidden
+ * from assistive technology; with reduced motion all cards stay still.
  */
 function AccessIllustration() {
   const { roleName } = useI18n();
@@ -83,41 +87,44 @@ function AccessIllustration() {
         </g>
       ))}
 
-      {/* Roles */}
+      {/* Roles. Each card is its own group so it can lift on its own; the
+          connector dots stay outside it, so the lines never detach. */}
       {roles.map((role, index) => {
         const y = ROWS[index];
         return (
           <g key={role.icon}>
-            <rect
-              className={`ah-illustration__card${index === 0 ? " ah-illustration__card--accent" : ""}`}
-              x="220"
-              y={y - 28}
-              width="220"
-              height="56"
-              rx="12"
-            />
-            <g className="ah-illustration__role-icon">
-              {role.icon === "team" && (
-                <>
-                  <PersonGlyph cx={244} cy={y} size={18} />
-                  <PersonGlyph cx={256} cy={y - 1} size={20} />
-                  <PersonGlyph cx={268} cy={y} size={18} />
-                </>
-              )}
-              {role.icon === "shield" && (
-                <>
-                  <path d={`M256 ${y - 13}l11 4v8c0 7-5 11-11 14-6-3-11-7-11-14v-8z`} />
-                  <path
-                    className="ah-illustration__check"
-                    d={`M251 ${y + 1}l4 4 7-8`}
-                  />
-                </>
-              )}
-              {role.icon === "person" && <PersonGlyph cx={256} cy={y} size={22} />}
+            <g className={`ah-illustration__role ah-illustration__role--${index + 1}`}>
+              <rect
+                className="ah-illustration__card ah-illustration__role-card"
+                x="220"
+                y={y - 28}
+                width="220"
+                height="56"
+                rx="12"
+              />
+              <g className="ah-illustration__role-icon">
+                {role.icon === "team" && (
+                  <>
+                    <PersonGlyph cx={244} cy={y} size={18} />
+                    <PersonGlyph cx={256} cy={y - 1} size={20} />
+                    <PersonGlyph cx={268} cy={y} size={18} />
+                  </>
+                )}
+                {role.icon === "shield" && (
+                  <>
+                    <path d={`M256 ${y - 13}l11 4v8c0 7-5 11-11 14-6-3-11-7-11-14v-8z`} />
+                    <path
+                      className="ah-illustration__check"
+                      d={`M251 ${y + 1}l4 4 7-8`}
+                    />
+                  </>
+                )}
+                {role.icon === "person" && <PersonGlyph cx={256} cy={y} size={22} />}
+              </g>
+              <text className="ah-illustration__label" x="286" y={y + 5}>
+                {role.label}
+              </text>
             </g>
-            <text className="ah-illustration__label" x="286" y={y + 5}>
-              {role.label}
-            </text>
             <circle className="ah-illustration__dot" cx="220" cy={y} r="4" />
             <circle className="ah-illustration__dot" cx="440" cy={y} r="4" />
           </g>

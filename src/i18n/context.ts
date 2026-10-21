@@ -5,6 +5,8 @@ import type { Translator } from "./translate";
 
 export type I18nContextValue = Translator & {
   setLocale: (locale: Locale) => void;
+  /** Set by the organisation settings while signed in; null = viewer's own. */
+  setTimeZone: (timeZone: string | null) => void;
 };
 
 export const I18nContext = createContext<I18nContextValue | null>(null);

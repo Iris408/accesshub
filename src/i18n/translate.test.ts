@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { LOCALES, MESSAGES } from "./locales";
 import type { MessageKey } from "./messages/en";
-import { createTranslator } from "./translate";
+import { createTranslator, dayKeyIn, startOfDayIn, supportedTimeZone } from "./translate";
 
 const english = MESSAGES.en;
 const keys = Object.keys(english).sort() as MessageKey[];
@@ -49,5 +49,40 @@ describe("createTranslator", () => {
     expect(ja.roleName("user")).toBe("メンバー");
     expect(ja.roleName("auditor")).toBe("閲覧者／監査担当");
     expect(ja.roleName("something-unknown")).toBe("メンバー");
+  });
+});
+
+describe("organisation timezone", () => {
+  it("formats dates and times in the organisation's timezone", () => {
+    const instant = new Date("2026-10-20T15:30:00Z");
+
+    expect(createTranslator("en", "Asia/Tokyo").formatDay(instant)).toBe("Wednesday, October 21, 2026");
+    expect(createTranslator("en", "America/New_York").formatDay(instant)).toBe("Tuesday, October 20, 2026");
+    expect(createTranslator("en", "Asia/Tokyo").formatTime(instant)).toBe("12:30 AM");
+    expect(createTranslator("en", "Asia/Tokyo").timeZone).toBe("Asia/Tokyo");
+  });
+
+  it("falls back to the viewer's own timezone for an unknown zone", () => {
+    expect(createTranslator("en", "Mars/Olympus_Mons").timeZone).toBeUndefined();
+    expect(supportedTimeZone(null)).toBeUndefined();
+    expect(supportedTimeZone("Europe/London")).toBe("Europe/London");
+  });
+
+  it("groups by calendar day in the timezone", () => {
+    const instant = new Date("2026-10-20T15:30:00Z");
+
+    expect(dayKeyIn(instant, "Asia/Tokyo")).toBe("2026-10-21");
+    expect(dayKeyIn(instant, "UTC")).toBe("2026-10-20");
+  });
+
+  it("finds when a day starts in the timezone, across daylight-saving changes", () => {
+    expect(startOfDayIn("2026-10-20", 0, "Asia/Tokyo")).toBe("2026-10-19T15:00:00.000Z");
+    expect(startOfDayIn("2026-10-20", 1, "UTC")).toBe("2026-10-21T00:00:00.000Z");
+    // New York: summer time (UTC−4) ends on 1 November 2026.
+    expect(startOfDayIn("2026-10-31", 0, "America/New_York")).toBe("2026-10-31T04:00:00.000Z");
+    expect(startOfDayIn("2026-11-01", 1, "America/New_York")).toBe("2026-11-02T05:00:00.000Z");
+    // London: the clocks go forward at 01:00 on 29 March 2026.
+    expect(startOfDayIn("2026-03-29", 0, "Europe/London")).toBe("2026-03-29T00:00:00.000Z");
+    expect(startOfDayIn("2026-03-30", 0, "Europe/London")).toBe("2026-03-29T23:00:00.000Z");
   });
 });

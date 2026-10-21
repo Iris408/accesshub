@@ -29,6 +29,10 @@ Related backend repository:
 | Protected dashboard | ✅ Working |
 | Admin user management | ✅ Working |
 | Four-role permissions | ✅ Working |
+| Access requests workflow | ✅ Working |
+| Configurable role permissions | ✅ Working |
+| Activity feed | ✅ Working |
+| Organisation settings | ✅ Working |
 | Loading and error states | ✅ Complete |
 | Vercel deployment | ✅ Live |
 | Render backend integration | ✅ Live |
@@ -46,6 +50,17 @@ Related backend repository:
   permanently delete, with accessible confirmation dialogs
 - One-time temporary passwords and a required password change at first sign-in
 - Users table with search, role and status filters, sorting and pagination
+- Access requests: members and managers ask for a different role; managers
+  and admins review a "New requests" box and a filterable queue, and approve
+  or decline with an optional note (only admins decide Manager requests)
+- Admin-only Settings: organisation name, timezone (used for every date and
+  time in the interface), access request policy and session length
+- Activity feed of organisation sign-ins and access events, filterable by
+  username, event type, outcome and date, for roles with `activity:read`
+- Roles page where Admins choose what Managers, Members and Viewers / Auditors
+  may do, with protected rules shown and explained; navigation follows
+  permission changes without signing out
+- Read-only Audit Log of sign-ins and administrative changes, with filters
 - Light and dark themes and six interface languages
 - Authenticated API requests
 - API integration with deployed FastAPI backend

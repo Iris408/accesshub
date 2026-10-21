@@ -6,6 +6,7 @@ import LoginPage from "./LoginPage";
 import I18nProvider from "../i18n/I18nProvider";
 import { LOCALES } from "../i18n/locales";
 import { callsTo, json, mockApi, networkError } from "../test/mockApi";
+import publicCss from "../public.css?raw";
 
 function renderLogin() {
   render(
@@ -142,6 +143,9 @@ describe("LoginPage demo access", () => {
   const DEMO_API = "https://demo-api.example.test";
 
   it("hides the demo action when no isolated demo API is configured", () => {
+    // Explicit, so a developer's .env.local can't change the outcome.
+    vi.stubEnv("VITE_API_URL", "https://api.example.test");
+    vi.stubEnv("VITE_DEMO_API_URL", "");
     renderLogin();
 
     expect(screen.queryByRole("button", { name: "Use demo account" })).toBeNull();
@@ -219,6 +223,119 @@ describe("LoginPage layout controls", () => {
     expect(screen.getByText("Manage users and roles from one place.")).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "Sign in" })).toBeTruthy();
     expect(document.querySelector(".ah-illustration")?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("animates the role cards in order without exposing them to assistive technology", () => {
+    renderLogin();
+
+    const svg = document.querySelector(".ah-illustration")!;
+    const cards = Array.from(svg.querySelectorAll(".ah-illustration__role"));
+
+    // Admin, Manager, Viewer / Auditor: each card a group that can lift on its own.
+    expect(cards.map((card) => card.getAttribute("class"))).toEqual([
+      "ah-illustration__role ah-illustration__role--1",
+      "ah-illustration__role ah-illustration__role--2",
+      "ah-illustration__role ah-illustration__role--3",
+    ]);
+    expect(cards.map((card) => card.querySelector("text")?.textContent)).toEqual([
+      "Admin",
+      "Manager",
+      "Viewer / Auditor",
+    ]);
+    // Connector dots stay outside the moving groups, so lines never detach.
+    expect(cards.every((card) => !card.querySelector(".ah-illustration__dot"))).toBe(true);
+
+    // Decorative only: hidden, not focusable, and nothing to announce.
+    expect(svg.getAttribute("aria-hidden")).toBe("true");
+    expect(svg.getAttribute("focusable")).toBe("false");
+    expect(svg.querySelector("[aria-live], [role]")).toBeNull();
+  });
+
+  it("orders the page for small screens: introduction, form, then the role strip", () => {
+    renderLogin();
+
+    const main = document.querySelector(".ah-public__main")!;
+    const blocks = Array.from(main.children).map((child) => child.className);
+    // The wide illustration (tablet and desktop) and the strip (mobile) are
+    // both present; CSS shows one or the other.
+    expect(blocks).toEqual(["ah-public__intro", "ah-public__art", "ah-signin", "ah-public__roles"]);
+  });
+
+  it("shows the roles as a compact, decorative strip in order", () => {
+    renderLogin();
+
+    const strip = document.querySelector(".ah-rolestrip")!;
+    expect(strip.getAttribute("aria-hidden")).toBe("true");
+    expect(strip.querySelector("[aria-live], [role], button, a")).toBeNull();
+
+    const cards = Array.from(strip.querySelectorAll(".ah-rolestrip__card"));
+    expect(cards.map((card) => card.className)).toEqual([
+      "ah-rolestrip__card ah-rolestrip__card--1",
+      "ah-rolestrip__card ah-rolestrip__card--2",
+      "ah-rolestrip__card ah-rolestrip__card--3",
+    ]);
+    expect(cards.map((card) => card.querySelector(".ah-rolestrip__label")?.textContent)).toEqual([
+      "Admin",
+      "Manager",
+      "Viewer / Auditor",
+    ]);
+    expect(cards.every((card) => card.querySelector(".ah-rolestrip__icon svg"))).toBe(true);
+  });
+
+  it("translates the role strip", () => {
+    localStorage.setItem("accesshub.language", "fr");
+    renderLogin();
+
+    expect(
+      Array.from(document.querySelectorAll(".ah-rolestrip__label")).map((label) => label.textContent)
+    ).toEqual(["Administrateur", "Responsable", "Lecteur / Auditeur"]);
+  });
+
+  it("splits at tablet width and stacks below it, animating the strip like the illustration", () => {
+    const block = (start: string) => {
+      const from = publicCss.indexOf(start);
+      expect(from).toBeGreaterThan(-1);
+      return publicCss.slice(from, publicCss.indexOf("\n}\n", from));
+    };
+
+    const tablet = block("@media (max-width: 1100px) {");
+    expect(tablet).toContain("grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);");
+
+    const mobile = block("@media (max-width: 899.98px) {");
+    expect(mobile).toMatch(/grid-template-areas:\s*"intro"\s*"form"\s*"roles";/);
+    expect(mobile).toMatch(/\.ah-public__art \{\s*display: none;/);
+    expect(mobile).toMatch(/\.ah-public__roles \{\s*display: block;/);
+
+    // Long translations wrap rather than clip or widen the page.
+    expect(block(".ah-rolestrip__label {")).toContain("overflow-wrap: anywhere;");
+    expect(block(".ah-rolestrip__card {")).toContain("animation: ah-strip-lift 10.5s ease-in-out infinite;");
+    expect(block(".ah-rolestrip__card--2,")).toContain("animation-delay: 3.5s;");
+    expect(block(".ah-rolestrip__card--3,")).toContain("animation-delay: 7s;");
+
+    const reduced = publicCss.slice(publicCss.indexOf(".ah-rolestrip__card,\n  .ah-rolestrip__icon {"));
+    expect(reduced.slice(0, 80)).toContain("animation: none;");
+  });
+
+  it("staggers the role cards on one loop and stops it for reduced motion", () => {
+    // jsdom doesn't run CSS animations, so check the stylesheet itself.
+    const block = (start: string) => {
+      const from = publicCss.indexOf(start);
+      expect(from).toBeGreaterThan(-1);
+      return publicCss.slice(from, publicCss.indexOf("}", from));
+    };
+
+    expect(block(".ah-illustration__role {")).toContain("animation: ah-role-lift 10.5s ease-in-out infinite;");
+    expect(block(".ah-illustration__role-card {")).toContain(
+      "animation: ah-role-highlight 10.5s ease-in-out infinite;"
+    );
+    // Admin first, then Manager after 3.5s, then Viewer / Auditor after 7s.
+    expect(block(".ah-illustration__role--2 .ah-illustration__role-card {")).toContain("animation-delay: 3.5s;");
+    expect(block(".ah-illustration__role--3 .ah-illustration__role-card {")).toContain("animation-delay: 7s;");
+
+    const reduced = block("@media (prefers-reduced-motion: reduce) {");
+    expect(reduced).toContain(".ah-illustration__role,");
+    expect(reduced).toContain(".ah-illustration__role-card {");
+    expect(reduced).toContain("animation: none;");
   });
 
   it("links to the verified project destinations in new tabs", () => {

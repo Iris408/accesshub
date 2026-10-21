@@ -247,9 +247,67 @@ body:has(.ah-public[data-theme="light"]) {
   filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.06));
 }
 
-.ah-illustration__card--accent {
-  fill: var(--ah-tone-blue-bg);
-  stroke: var(--ah-badge-admin-border);
+/*
+ * Role cards take turns: Admin, Manager, then Viewer / Auditor, on one slow
+ * 10.5s loop (3.5s each). The active card lifts a few units and takes the
+ * blue highlight, holds, and settles back before the next one starts. Only
+ * transform, fill and stroke change, so nothing reflows, and every card and
+ * label stays visible throughout.
+ */
+.ah-illustration__role {
+  animation: ah-role-lift 10.5s ease-in-out infinite;
+}
+
+.ah-illustration__role-card {
+  animation: ah-role-highlight 10.5s ease-in-out infinite;
+}
+
+.ah-illustration__role--2,
+.ah-illustration__role--2 .ah-illustration__role-card {
+  animation-delay: 3.5s;
+}
+
+.ah-illustration__role--3,
+.ah-illustration__role--3 .ah-illustration__role-card {
+  animation-delay: 7s;
+}
+
+/* 0–10%: rise · 10–22%: hold · 22–31%: settle · 31–100%: rest */
+@keyframes ah-role-lift {
+  0%,
+  31%,
+  100% {
+    transform: translateY(0);
+  }
+
+  10%,
+  22% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes ah-role-highlight {
+  0%,
+  31%,
+  100% {
+    fill: var(--ah-surface);
+    stroke: var(--ah-border);
+  }
+
+  /* An opaque tint, so the background shapes don't show through the card. */
+  10%,
+  22% {
+    fill: color-mix(in srgb, var(--ah-tone-blue) 9%, var(--ah-surface));
+    stroke: var(--ah-badge-admin-border);
+  }
+}
+
+/* Reduced motion: no loop; all three cards stay in their resting state. */
+@media (prefers-reduced-motion: reduce) {
+  .ah-illustration__role,
+  .ah-illustration__role-card {
+    animation: none;
+  }
 }
 
 .ah-illustration__avatar--strong { fill: var(--ah-illus-avatar-strong); }
@@ -440,20 +498,180 @@ body:has(.ah-public[data-theme="light"]) {
   opacity: 0.7;
 }
 
+/* ---------- Role strip (small screens) ---------- */
+
+/*
+ * Stands in for the wide illustration below the tablet split: three compact
+ * role cards under the form. Like the illustration's role cards, they take
+ * turns (Admin, Manager, Viewer / Auditor) on one slow 10.5s loop, one at a
+ * time; only transform and colours change, so nothing reflows.
+ */
+.ah-public__roles {
+  grid-area: roles;
+  display: none;
+}
+
+.ah-rolestrip {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 6px 0 0;
+  list-style: none;
+}
+
+/* Connector through the centres of the three icons. */
+.ah-rolestrip::before {
+  content: "";
+  position: absolute;
+  top: calc(6px + 22px);
+  right: calc(100% / 6);
+  left: calc(100% / 6);
+  height: 1.5px;
+  background: var(--ah-illus-line);
+}
+
+.ah-rolestrip__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+  animation: ah-strip-lift 10.5s ease-in-out infinite;
+}
+
+.ah-rolestrip__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--ah-illus-dot);
+  border-radius: 999px;
+  background: var(--ah-surface);
+  color: var(--ah-illus-dot);
+  animation: ah-strip-highlight 10.5s ease-in-out infinite;
+}
+
+/* Longer translations wrap instead of clipping or widening the page. */
+.ah-rolestrip__label {
+  max-width: 100%;
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.ah-rolestrip__card--2,
+.ah-rolestrip__card--2 .ah-rolestrip__icon {
+  animation-delay: 3.5s;
+}
+
+.ah-rolestrip__card--3,
+.ah-rolestrip__card--3 .ah-rolestrip__icon {
+  animation-delay: 7s;
+}
+
+/* Same rhythm as the illustration: rise, hold, settle, rest. */
+@keyframes ah-strip-lift {
+  0%,
+  31%,
+  100% {
+    transform: translateY(0);
+  }
+
+  10%,
+  22% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes ah-strip-highlight {
+  0%,
+  31%,
+  100% {
+    border-color: var(--ah-illus-dot);
+    background: var(--ah-surface);
+    box-shadow: 0 0 0 0 transparent;
+  }
+
+  10%,
+  22% {
+    border-color: var(--ah-primary);
+    background: color-mix(in srgb, var(--ah-primary) 16%, var(--ah-surface));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ah-primary) 16%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ah-rolestrip__card,
+  .ah-rolestrip__icon {
+    animation: none;
+  }
+}
+
 /* ---------- Responsive ---------- */
 
+/* Tablet (900–1100px): the desktop split, tightened to fit. */
 @media (max-width: 1100px) {
   .ah-public__main {
-    grid-template-areas:
-      "intro"
-      "form"
-      "art";
-    grid-template-columns: minmax(0, 1fr);
-    max-width: 560px;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+    gap: clamp(16px, 2.5vh, 24px) clamp(24px, 4vw, 48px);
+  }
+
+  .ah .ah-public__heading {
+    font-size: clamp(34px, 4.4vw, 48px);
+  }
+
+  .ah-public:is([lang="ja"], [lang="ko"], [lang="zh-CN"]) .ah-public__heading {
+    font-size: clamp(30px, 4vw, 42px);
+  }
+
+  .ah .ah-public__subheading {
+    font-size: 18px;
   }
 
   .ah-public__art {
     max-width: 100%;
+  }
+
+  .ah-signin {
+    padding: 28px;
+  }
+
+  .ah .ah-signin__title {
+    font-size: 30px;
+  }
+}
+
+/* Mobile (below the split): header, introduction, form, then the role strip. */
+@media (max-width: 899.98px) {
+  .ah-public__main {
+    grid-template-areas:
+      "intro"
+      "form"
+      "roles";
+    grid-template-columns: minmax(0, 1fr);
+    /* Keep the rows together; spare height goes below, not between them. */
+    align-content: start;
+    max-width: 560px;
+    gap: 20px;
+    padding-block: 4px 24px;
+  }
+
+  .ah-public__intro {
+    align-self: start;
+  }
+
+  .ah-public__art {
+    display: none;
+  }
+
+  .ah-public__roles {
+    display: block;
   }
 }
 
@@ -480,7 +698,20 @@ body:has(.ah-public[data-theme="light"]) {
   }
 
   .ah-signin {
+    padding: 20px;
     border-radius: 16px;
+  }
+
+  /* Phones (Mobile A): the button already says "Sign in", so the card's
+     title is kept for screen readers (it labels the form) but not shown. */
+  .ah .ah-signin__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .ah-public__footer {

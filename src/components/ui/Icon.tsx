@@ -147,6 +147,7 @@ const paths = {
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
   user: (
     <>
       <circle cx="12" cy="8" r="4" />

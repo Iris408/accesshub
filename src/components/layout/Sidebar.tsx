@@ -2,7 +2,10 @@ import type { Ref } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 import { useAuth } from "../../auth/context";
+import { isAdminRole } from "../../auth/roles";
 import { useI18n } from "../../i18n/context";
+import { useOrganisation } from "../../organisation/context";
+import type { MessageKey } from "../../i18n/messages/en";
 import Icon, { type IconName } from "../ui/Icon";
 import { MAIN_NAV, type NavItem } from "./navigation";
 
@@ -16,10 +19,11 @@ type NavEntryProps = {
   label: string;
   status?: NavItem["status"];
   locked?: boolean;
+  lockedLabel?: MessageKey;
   onNavigate: () => void;
 };
 
-function NavEntry({ to, icon, label, status, locked, onNavigate }: NavEntryProps) {
+function NavEntry({ to, icon, label, status, locked, lockedLabel, onNavigate }: NavEntryProps) {
   const { t } = useI18n();
 
   return (
@@ -36,7 +40,7 @@ function NavEntry({ to, icon, label, status, locked, onNavigate }: NavEntryProps
         {locked && (
           <span className="ah-nav__lock">
             <Icon name="lock" size={14} />
-            <span className="ah-sr-only"> {t("shell.adminsOnly")}</span>
+            <span className="ah-sr-only"> {t(lockedLabel ?? "shell.adminsOnly")}</span>
           </span>
         )}
       </NavLink>
@@ -54,6 +58,7 @@ type SidebarProps = {
 function Sidebar({ id, closeButtonRef, onNavigate, onClose }: SidebarProps) {
   const { can, profile, signOut } = useAuth();
   const { t } = useI18n();
+  const { organisation } = useOrganisation();
 
   return (
     <aside id={id} className="ah-sidebar" aria-label={t("shell.sidebar")}>
@@ -78,6 +83,13 @@ function Sidebar({ id, closeButtonRef, onNavigate, onClose }: SidebarProps) {
         </button>
       </div>
 
+      {organisation.organisation_name && (
+        <p className="ah-sidebar__org" title={organisation.organisation_name}>
+          <span className="ah-sr-only">{t("shell.organisation")}: </span>
+          {organisation.organisation_name}
+        </p>
+      )}
+
       <nav className="ah-nav" aria-label={t("shell.mainNav")}>
         <ul>
           {MAIN_NAV.map((item) => (
@@ -87,8 +99,11 @@ function Sidebar({ id, closeButtonRef, onNavigate, onClose }: SidebarProps) {
               icon={item.icon}
               label={t(`nav.${item.id}.label`)}
               status={item.status}
+              lockedLabel={item.lockedLabel}
               locked={
-                item.status === "admin" && profile.status === "ready" && !can("users:read")
+                profile.status === "ready" &&
+                Boolean(item.allowed) &&
+                !item.allowed?.({ can, isAdmin: isAdminRole(profile.user.role) })
               }
               onNavigate={onNavigate}
             />

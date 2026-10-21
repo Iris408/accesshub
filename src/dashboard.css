@@ -142,6 +142,7 @@ body:has(.ah[data-theme="light"]) {
 
 .ah-sr-only,
 .ah--rail .ah-brand__word,
+.ah--rail .ah-sidebar__org,
 .ah--rail .ah-nav__tag,
 .ah--rail .ah-nav__lock {
   position: absolute;
@@ -209,6 +210,17 @@ body:has(.ah[data-theme="light"]) {
 
 .ah-brand__word span {
   color: var(--ah-brand-accent);
+}
+
+/* The organisation's name (Settings), under the product name. */
+.ah .ah-sidebar__org {
+  margin: -16px 6px 20px;
+  overflow: hidden;
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ah-brand__mark {
@@ -1509,6 +1521,776 @@ body:has(.ah[data-theme="light"]) {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* ---------- Audit log ---------- */
+
+.ah .ah-btn--small {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.ah-field--date {
+  min-width: 150px;
+}
+
+.ah-field--action {
+  align-self: flex-end;
+}
+
+.ah .ah-toolbar__message {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.ah-audit__results {
+  transition: opacity 0.15s ease;
+}
+
+.ah-audit__results.is-refreshing {
+  opacity: 0.55;
+}
+
+/* Keep columns readable on narrow screens (CJK text can otherwise wrap a
+   character per line); the table scrolls inside its panel instead. */
+.ah-audit__results .ah-table {
+  min-width: 760px;
+}
+
+.ah-audit__event {
+  min-width: 9em;
+}
+
+.ah-audit__time {
+  white-space: nowrap;
+  color: var(--ah-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ah-audit__person,
+.ah-audit__event {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.ah-audit__name {
+  font-weight: 500;
+  overflow-wrap: break-word;
+}
+
+.ah-audit__muted {
+  color: var(--ah-text-muted);
+  font-size: 13px;
+}
+
+.ah-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.ah-outcome--success {
+  background: var(--ah-tone-green-bg);
+  color: var(--ah-tone-green);
+}
+
+.ah-outcome--failure {
+  background: var(--ah-danger-soft);
+  color: var(--ah-danger);
+}
+
+.ah-outcome--denied {
+  background: var(--ah-warning-soft);
+  color: var(--ah-warning);
+}
+
+.ah-outcome--unknown {
+  background: var(--ah-surface-raised);
+  color: var(--ah-text-muted);
+}
+
+.ah-detail-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.ah-detail-list__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 38%) minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ah-border);
+}
+
+.ah-detail-list__row:last-child {
+  border-bottom: 0;
+}
+
+.ah-detail-list dt {
+  color: var(--ah-text-muted);
+}
+
+.ah-detail-list dd {
+  margin: 0;
+  color: var(--ah-text);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 479.98px) {
+  .ah-detail-list__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
+/* ---------- Access requests ---------- */
+
+.ah-requests-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ah .ah-requests__notice {
+  margin: 0 0 16px;
+}
+
+.ah-notice--info {
+  margin: 0 20px 4px;
+  padding: 10px 14px;
+  border-color: var(--ah-badge-admin-border);
+  background: var(--ah-tone-blue-bg);
+}
+
+.ah-notice--info .ah-notice__icon {
+  color: var(--ah-tone-blue);
+}
+
+.ah-requests-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .ah-requests-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.ah .ah-textarea {
+  min-height: 96px;
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+  font: inherit;
+}
+
+.ah-new-requests {
+  border-color: var(--ah-badge-admin-border);
+}
+
+.ah-new-requests__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+
+.ah-new-requests__count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--ah-text-muted);
+}
+
+.ah-new-requests__number {
+  color: var(--ah-text);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ah-new-requests__list,
+.ah-request-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ah-new-requests__list {
+  border: 1px solid var(--ah-border);
+  border-radius: 10px;
+}
+
+.ah-new-requests__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ah-border);
+}
+
+.ah-new-requests__item:last-child {
+  border-bottom: 0;
+}
+
+.ah-new-requests__who,
+.ah-new-requests__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.ah-new-requests__meta {
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 599.98px) {
+  .ah-new-requests__item {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ah-new-requests__meta {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .ah-new-requests__item .ah-btn {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+.ah-role-change {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.ah-role-change__arrow {
+  flex: none;
+  color: var(--ah-text-subtle);
+}
+
+.ah-requests__results {
+  transition: opacity 0.15s ease;
+}
+
+.ah-requests__results.is-refreshing {
+  opacity: 0.55;
+}
+
+.ah-requests__results .ah-table {
+  min-width: 920px;
+}
+
+.ah-requests__reason {
+  min-width: 12em;
+  max-width: 26em;
+}
+
+.ah-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.ah-request-reason {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ah-request-list {
+  padding: 0 20px 20px;
+  gap: 12px;
+}
+
+.ah-request-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--ah-border);
+  border-radius: 10px;
+  background: var(--ah-surface-raised);
+}
+
+.ah-request-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ah-request-card__meta {
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: 13px;
+}
+
+.ah-request-card__decision {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ah-border);
+}
+
+.ah-request-card__note {
+  margin: 0;
+  padding-inline-start: 10px;
+  border-inline-start: 3px solid var(--ah-border-strong);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Roles ---------- */
+
+.ah-roles__results {
+  transition: opacity 0.15s ease;
+}
+
+.ah-roles__results.is-refreshing {
+  opacity: 0.55;
+}
+
+/* The scroll region is the containing block for the visually hidden text in
+   its cells, so that text can't widen the page. */
+.ah-perm-matrix {
+  position: relative;
+}
+
+/* Keep role columns readable on narrow screens; the matrix scrolls instead. */
+.ah-perm-matrix .ah-table {
+  min-width: 640px;
+}
+
+.ah-perm-matrix .ah-perm-matrix__role,
+.ah-perm-matrix__cell {
+  width: 13%;
+  text-align: center;
+}
+
+.ah-perm-matrix tbody th {
+  width: 40%;
+  min-width: 14em;
+  background: var(--ah-surface);
+  color: var(--ah-text);
+  text-align: start;
+  font-weight: 400;
+}
+
+.ah-perm-matrix__capability {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ah-perm-matrix__label {
+  color: var(--ah-text);
+  font-weight: 600;
+}
+
+.ah-perm-matrix__hint {
+  color: var(--ah-text-muted);
+  font-size: 13px;
+}
+
+.ah .ah-perm-matrix__code {
+  display: inline;
+  padding: 0;
+  background: none;
+  color: var(--ah-text-subtle);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Phones: keep the capability visible while the role columns scroll past it. */
+@media (max-width: 599.98px) {
+  .ah-perm-matrix .ah-table {
+    min-width: 480px;
+  }
+
+  .ah-perm-matrix th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: auto;
+    min-width: 0;
+    max-width: 9.5em;
+    box-shadow: 1px 0 0 var(--ah-border);
+  }
+
+  .ah-perm-matrix thead th:first-child {
+    background: var(--ah-surface-raised);
+  }
+
+  /* Still read by screen readers (aria-describedby), just not shown. */
+  .ah-perm-matrix__hint,
+  .ah .ah-perm-matrix__code {
+    display: none;
+  }
+}
+
+.ah-perm-matrix__cell {
+  vertical-align: middle;
+}
+
+.ah-perm-matrix__cell.is-changed {
+  background: var(--ah-tone-blue-bg);
+  box-shadow: inset 0 0 0 1px var(--ah-badge-admin-border);
+}
+
+.ah-perm-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.ah-perm-state.is-on {
+  background: var(--ah-tone-green-bg);
+  color: var(--ah-tone-green);
+}
+
+.ah-perm-state.is-off {
+  background: var(--ah-surface-raised);
+  color: var(--ah-text-subtle);
+}
+
+.ah-perm-matrix__lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: 4px;
+  color: var(--ah-text-subtle);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+
+.ah-perm-check {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ah-perm-check input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--ah-primary);
+  cursor: pointer;
+}
+
+.ah-perm-check input:disabled {
+  cursor: not-allowed;
+}
+
+.ah-perm-check__text {
+  color: var(--ah-text-muted);
+  font-size: 12px;
+}
+
+.ah-perm-matrix__changed {
+  display: block;
+  color: var(--ah-tone-blue);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ah .ah-roles__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 16px 20px 0;
+}
+
+.ah-roles__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--ah-border);
+}
+
+.ah-roles__status {
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: 14px;
+}
+
+.ah-roles__rules {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0 20px 20px;
+  list-style: none;
+}
+
+.ah-roles__rules li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--ah-text);
+  font-size: 14px;
+}
+
+.ah-roles__rules .ah-perm-matrix__lock {
+  flex: none;
+  min-width: 2.2em;
+  margin: 0;
+}
+
+/* ---------- Activity feed ---------- */
+
+.ah-feed {
+  border-top: 1px solid var(--ah-border);
+  transition: opacity 0.15s ease;
+}
+
+.ah-feed.is-refreshing {
+  opacity: 0.55;
+}
+
+.ah-feed__date {
+  margin: 0;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--ah-border);
+  background: var(--ah-surface-raised);
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ah-feed__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ah-feed__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--ah-border);
+}
+
+/* Narrow panels (dashboard): the time goes under the event text. */
+.ah-feed__list--compact .ah-feed__item {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.ah-feed__list--compact .ah-feed__time {
+  grid-column: 2;
+}
+
+.ah-feed__list--compact .ah-feed__item:last-child {
+  border-bottom: 0;
+}
+
+.ah-feed__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--ah-surface-raised);
+  color: var(--ah-text-muted);
+}
+
+.ah-feed__icon.is-success {
+  background: var(--ah-tone-green-bg);
+  color: var(--ah-tone-green);
+}
+
+.ah-feed__icon.is-failure {
+  background: var(--ah-danger-soft);
+  color: var(--ah-danger);
+}
+
+.ah-feed__icon.is-denied {
+  background: var(--ah-warning-soft);
+  color: var(--ah-warning);
+}
+
+.ah-feed__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ah-feed__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0;
+}
+
+.ah-feed__event {
+  color: var(--ah-text);
+  font-weight: 600;
+}
+
+.ah-feed__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.ah-feed__time {
+  color: var(--ah-text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 599.98px) {
+  .ah-feed__item {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+
+  .ah-feed__time,
+  .ah-feed__details {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* Demo sessions: Roles and Settings changes are shared by every visitor. */
+.ah .ah-demo-shared {
+  margin: 0;
+}
+
+/* ---------- Settings ---------- */
+
+.ah-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ah-settings .ah-stack-form {
+  max-width: 640px;
+}
+
+.ah-settings__switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.ah-settings__switch > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ah-settings__switch-label {
+  color: var(--ah-text);
+  font-weight: 600;
+}
+
+.ah-settings__switch input,
+.ah-settings__check input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--ah-primary);
+  cursor: pointer;
+}
+
+.ah-settings__roles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ah-settings__roles:disabled {
+  opacity: 0.6;
+}
+
+.ah-settings__roles legend {
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+.ah-settings__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ah-text);
+  cursor: pointer;
+}
+
+.ah-settings__roles:disabled .ah-settings__check,
+.ah-settings__roles:disabled .ah-settings__check input {
+  cursor: not-allowed;
+}
+
+.ah-settings__actions .ah-roles__actions {
+  border-top: 0;
 }
 
 /* ---------- Help ---------- */
